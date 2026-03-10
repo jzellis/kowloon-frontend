@@ -4,6 +4,8 @@
 import { Outlet, Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Header } from './Header'
+import Sidebar from './Sidebar'
+import RightSidebar from './RightSidebar'
 
 export default function Layout() {
   const { user, sessionChecked } = useSelector((state) => state.auth)
@@ -23,9 +25,13 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-base-200">
       <Header />
-      <main className="container mx-auto px-4 py-6 max-w-4xl">
-        <Outlet />
-      </main>
+      <div className="w-full px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-3"><Sidebar /></div>
+          <main className="lg:col-span-6"><Outlet /></main>
+          <div className="lg:col-span-3"><RightSidebar /></div>
+        </div>
+      </div>
     </div>
   )
 }
