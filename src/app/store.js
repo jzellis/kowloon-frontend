@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import authReducer, { restoreSessionAsync } from '../features/auth/authSlice'
+import feedReducer from './feedSlice'
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    feed: feedReducer,
   },
 })
 
