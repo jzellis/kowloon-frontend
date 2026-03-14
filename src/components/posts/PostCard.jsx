@@ -14,7 +14,7 @@ export default function PostCard({ post }) {
 
   return (
     <article
-      className="flex flex-col gap-3 py-5 pl-4 border-b border-base-300 border-l-4"
+      className={`post-type-${post?.type?.toLowerCase()} flex flex-col gap-3 py-5 pl-4 border-b border-base-300 border-l-4`}
       style={{ borderLeftColor: typeColor ?? 'transparent' }}
     >
       <PostMeta post={post} />
