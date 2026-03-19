@@ -84,6 +84,9 @@ export default function RichTextEditor({ content = '', onChange, maxWords }) {
             Unlink
           </ToolbarButton>
         )}
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')}>
+          &ldquo;&rdquo;
+        </ToolbarButton>
       </div>
 
       {/* Editor area */}

@@ -151,7 +151,7 @@ export default function FeedHeader({ circles = [], currentCircle }) {
   return (
     <div className="flex flex-col gap-0 border-b-2 border-base-300 mb-4">
       {/* Title row — circle name IS the selector trigger */}
-      <div className="flex items-baseline gap-3 py-3">
+      <div className="flex items-center gap-3 py-3">
         <CircleSelector
           circles={circles}
           value={currentCircleObj?.id}

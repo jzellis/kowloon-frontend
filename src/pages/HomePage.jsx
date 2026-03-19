@@ -25,6 +25,13 @@ const MOCK_USER = {
 
 const H = (n) => new Date(Date.now() - 1000 * 60 * 60 * n).toISOString()
 const M = (n) => new Date(Date.now() - 1000 * 60 * n).toISOString()
+// Future date helpers: F(daysFromNow, hourOfDay)
+const F = (days, hour = 19) => {
+  const d = new Date()
+  d.setDate(d.getDate() + days)
+  d.setHours(hour, 0, 0, 0)
+  return d.toISOString()
+}
 
 const AU = { url: 'https://upload.wikimedia.org/wikipedia/commons/8/8c/WPGC_-_Jingle_%22Bright_New_Sound%22.ogg', mediaType: 'audio/ogg' }
 const VID = { url: 'https://www.w3schools.com/html/mov_bbb.mp4', mediaType: 'video/mp4' }
@@ -55,7 +62,27 @@ const MOCK_POSTS = [
     id: 'post:2@kwln.org',
     type: 'Article',
     name: 'On the Aesthetics of Midcentury Design',
-    source: 'There is something about the graphic design of the 1950s that feels both timeless and urgently contemporary. Reid Miles understood that negative space *is* content — that what you leave out is as important as what you put in.\n\nThis is a lesson most modern UI designers have forgotten entirely.',
+    source: `There is something about the graphic design of the 1950s that feels both timeless and urgently contemporary. Reid Miles understood that negative space *is* content — that what you leave out is as important as what you put in.
+
+This is a lesson most modern UI designers have forgotten entirely. We live in an era of maximum surface density: every pixel colonised, every margin filled with a notification badge or a call to action. The silence that makes music possible has been designed out of our interfaces.
+
+Look at a Blue Note record sleeve from 1957. The typography is aggressive but controlled. The photography — almost always Francis Wolff's — is cropped to the point of abstraction. There is one thing happening on that cover, and it is happening with total commitment. This is not minimalism in the contemporary sense, which is usually just maximalism with the colour drained out. It is *discipline*.
+
+> The job of the designer is not to give the public what it wants. The job of the designer is to invent things that the public didn't know it needed, and then make it impossible for the public to imagine life without them.
+
+## The Grid as Argument
+
+Midcentury designers didn't use grids because they were fashionable. They used grids because a grid is a *position* — a statement that visual relationships are meaningful, that alignment is a form of respect for the reader's eye. Josef Müller-Brockmann's concert posters work not because they are beautiful, which they are, but because they are *argued*. Every element is where it is for a reason you can state out loud.
+
+Contrast this with the dominant aesthetic of contemporary software design, which might be described as *ambient vagueness*: rounded rectangles, drop shadows that don't correspond to any light source, gradients that gesture at depth without committing to it. The visual language says *nothing*. It is designed to offend no one, which means it moves no one.
+
+## What This Means For Us
+
+If we are building something — a publication, a social space, a tool — we owe it to the people who will use it to have an opinion about how it looks. Not a brand identity. An *opinion*. A point of view that the design expresses whether or not anyone reads the about page.
+
+The 1950s designers had constraints we don't: two colours, one typeface, no computers. Those constraints forced decisions. We have to impose the constraints ourselves. That is harder. It requires something closer to taste than to process, which is why most design-by-committee produces work that looks like it was designed by a committee.
+
+Pick a typeface and mean it. Leave space empty on purpose. Make the thing *say* something.`,
     published: H(2),
     visibility: 'Public',
     attributedTo: DESIGN,
@@ -85,9 +112,49 @@ const MOCK_POSTS = [
     name: 'New poster for the show', source: 'Hand-set type, printed on a Vandercook. Limited run of 50.',
     attachments: [{ ...IMG('poster3') }] },
 
-  { id: 'post:4@kwln.org',  type: 'Event', published: H(10), visibility: 'Public', attributedTo: MOCK_USER,
-    name: 'Kowloon Dev Meetup',
-    source: 'Come hang out and talk about federated social networks, indie web, and whatever else. Drinks provided.' },
+  {
+    id: 'post:4@kwln.org',
+    type: 'Event',
+    published: H(10),
+    visibility: 'Public',
+    attributedTo: MOCK_USER,
+    name: 'Kowloon Dev Meetup #4',
+    source: `Come hang out and talk federated social networks, indie web, ActivityPub, and whatever else you're building. This month we'll have a short demo slot — bring something to show, even if it's half-broken.
+
+Food and drinks provided. Capacity is limited so please RSVP.`,
+    startTime: F(8, 18),
+    endTime:   F(8, 21),
+    location:  { type: 'Place', name: 'The Barbican Centre, Silk St, London EC2Y 8DS' },
+    featuredImage: 'https://picsum.photos/seed/barbican7/1200/600',
+    tag: [
+      { type: 'Hashtag', name: '#indieweb' },
+      { type: 'Hashtag', name: '#activitypub' },
+      { type: 'Hashtag', name: '#kowloon' },
+    ],
+  },
+  {
+    id: 'post:26@kwln.org',
+    type: 'Event',
+    published: H(6),
+    visibility: 'Public',
+    attributedTo: RECORDS,
+    name: 'Blue Note at The Jazz Cafe',
+    source: `A night of classic Blue Note repertoire — Monk, Coltrane, Miles, Lee Morgan — performed live by the **Blue Note Collective**, a rotating ensemble of London session musicians who know how to swing.
+
+Two sets. No support act. Come early for a seat.
+
+*"The only valid censorship of ideas is the right of people not to listen."* — Tommy Smalls`,
+    startTime: F(14, 20),
+    endTime:   F(14, 23),
+    location:  { type: 'Place', name: 'The Jazz Cafe, 5 Parkway, Camden Town, London NW1 7PG' },
+    featuredImage: 'https://picsum.photos/seed/jazzclub2/1200/600',
+    tag: [
+      { type: 'Hashtag', name: '#jazz' },
+      { type: 'Hashtag', name: '#bluenote' },
+      { type: 'Hashtag', name: '#livemusic' },
+      { type: 'Hashtag', name: '#camden' },
+    ],
+  },
 
   { id: 'post:5@kwln.org',  type: 'Media', published: H(12), visibility: 'Public', attributedTo: MOCK_USER,
     name: 'New track: "Wanchai Drift"', source: 'Recorded this late last night. Somewhere between jazz and something else entirely. Let me know what you think.',

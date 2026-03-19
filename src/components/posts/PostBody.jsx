@@ -3,6 +3,7 @@
 // Props: post object
 
 import { marked } from 'marked'
+import AudioPlayer from '../ui/AudioPlayer'
 
 marked.use({ breaks: true, gfm: true })
 
@@ -14,12 +15,12 @@ function LinkTitle({ post }) {
 
   return (
     <div className="mb-3">
-      <h2 className="font-display text-3xl">
+      <h1 className="font-display text-5xl mb-12">
         {post.href
           ? <a href={post.href} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">{post.name}</a>
           : post.name
         }
-      </h2>
+      </h1>
       {domain && (
         <p className="font-ui text-xs uppercase tracking-widest text-base-content/40 mt-0.5">{domain}</p>
       )}
@@ -28,7 +29,7 @@ function LinkTitle({ post }) {
 }
 
 
-function Attachments({ attachments = [] }) {
+function Attachments({ attachments = [], featuredImage = null }) {
   if (!attachments.length) return null
   return (
     <div className="flex flex-col gap-2 mt-3">
@@ -46,9 +47,12 @@ function Attachments({ attachments = [] }) {
         }
         if (mt.startsWith('audio/')) {
           return (
-            <audio key={i} controls className="w-full mt-1">
-              <source src={a.url} type={mt} />
-            </audio>
+            <AudioPlayer
+              key={i}
+              src={a.url}
+              image={featuredImage}
+              className="w-full aspect-video"
+            />
           )
         }
         if (mt.startsWith('video/')) {
@@ -85,14 +89,14 @@ export default function PostBody({ post }) {
       {post?.name && (
         isLink
           ? <LinkTitle post={post} />
-          : <h2 className="font-display text-3xl mb-3">{post.name}</h2>
+          : <h1 className="font-display text-5xl mt-4 mb-16">{post.name}</h1>
       )}
       <div
         className="prose prose-sm max-w-none"
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
-      {post?.attachments?.length > 0 && <Attachments attachments={post.attachments} />}
+      {post?.attachments?.length > 0 && <Attachments attachments={post.attachments} featuredImage={post.featuredImage ?? post.image ?? null} />}
     </div>
   )
 }

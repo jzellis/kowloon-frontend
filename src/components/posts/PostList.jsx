@@ -9,6 +9,7 @@ import EmptyState from '../ui/EmptyState'
 import ErrorState from '../ui/ErrorState'
 import Pagination from '../ui/Pagination'
 import { POST_TYPES } from '../../lib/postTypes'
+import { Play } from 'lucide-react'
 
 // ── Media grid ────────────────────────────────────────────────────────────────
 
@@ -32,11 +33,17 @@ function MediaThumb({ post }) {
       </>
     )
   } else if (mt.startsWith('audio/')) {
+    const bg = post.featuredImage ?? post.image ?? null
     thumb = (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-base-300 px-3">
-        <span className="font-display text-4xl" style={{ color: POST_TYPES.Media.color }}>&#9834;</span>
-        <p className="font-ui text-xs uppercase tracking-widest text-base-content/60 text-center mt-2 line-clamp-2">{post.name}</p>
-      </div>
+      <>
+        {bg
+          ? <img src={bg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          : <div className="absolute inset-0 bg-base-300" />
+        }
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <Play className="w-8 h-8 text-white translate-x-0.5" />
+        </div>
+      </>
     )
   } else {
     // No attachment — solid color placeholder
@@ -53,17 +60,19 @@ function MediaThumb({ post }) {
       className="relative block aspect-square overflow-hidden bg-base-300 group"
     >
       {thumb}
-      {/* Hover overlay */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100">
+      {/* Always-visible title/author bar */}
+      <div className="absolute bottom-0 left-0 right-0 px-2.5 pt-6 pb-2 bg-gradient-to-t from-black/75 to-transparent">
         {post.name && (
-          <p className="font-display text-white text-lg leading-tight tracking-wide line-clamp-2">{post.name}</p>
+          <p className="font-display text-white text-base leading-tight tracking-wide line-clamp-2">{post.name}</p>
         )}
         {post.attributedTo && (
-          <p className="font-ui text-xs uppercase tracking-widest text-white/70 mt-1">
+          <p className="font-ui text-xs uppercase tracking-widest text-white/70 mt-0.5 truncate">
             {post.attributedTo.displayName ?? post.attributedTo.username}
           </p>
         )}
       </div>
+      {/* Hover brighten */}
+      <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
     </Link>
   )
 }

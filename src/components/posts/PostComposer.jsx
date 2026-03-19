@@ -11,6 +11,7 @@ import UserAvatar from '../ui/UserAvatar'
 import PostTypeSelector from './PostTypeSelector'
 import RichTextEditor from './RichTextEditor'
 import CircleSelector from '../circles/CircleSelector'
+import AudioPlayer from '../ui/AudioPlayer'
 
 const NOTE_MAX_WORDS = 500
 const NOTE_MAX_CHARS = 5000
@@ -84,11 +85,7 @@ function AttachmentPreview({ att }) {
     )
   }
   if (mt.startsWith('audio/')) {
-    return (
-      <div className="flex flex-col gap-1 w-full">
-        <audio controls className="w-full h-8" src={att.previewUrl} />
-      </div>
-    )
+    return <AudioPlayer src={att.previewUrl} className="w-20 h-20" />
   }
   return null
 }
@@ -373,22 +370,44 @@ export default function PostComposer({ circles = [], onPostCreated }) {
         />
       )}
 
-      {/* Event datetimes */}
+      {/* Event datetimes + location */}
       {postType === 'Event' && (
-        <div className="flex border-b-2 border-base-300">
-          <input
-            type="datetime-local"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content outline-none border-r-2 border-base-300"
-          />
-          <input
-            type="datetime-local"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content/60 outline-none"
-          />
-        </div>
+        <>
+          <div className="flex border-b-2 border-base-300">
+            <input
+              type="datetime-local"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content outline-none border-r-2 border-base-300"
+            />
+            <input
+              type="datetime-local"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content/60 outline-none"
+            />
+          </div>
+          <div className="flex items-center border-b-2 border-base-300 bg-base-100">
+            <input
+              type="text"
+              placeholder="Location (optional)…"
+              value={location}
+              onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
+              className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleGeolocate}
+              disabled={locating}
+              title="Use my location"
+              className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${
+                geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'
+              }`}
+            >
+              {locating ? '…' : 'GPS'}
+            </button>
+          </div>
+        </>
       )}
 
       {/* Rich text editor */}
@@ -436,8 +455,8 @@ export default function PostComposer({ circles = [], onPostCreated }) {
       {/* Tags — Article, Link, Event, Media */}
       {hasTags && <TagsInput tags={tags} onChange={setTags} />}
 
-      {/* Location — all types */}
-      <div className="flex items-center border-b-2 border-base-300 bg-base-100">
+      {/* Location — all types except Event (rendered above datetimes for Event) */}
+      {postType !== 'Event' && <div className="flex items-center border-b-2 border-base-300 bg-base-100">
         <input
           type="text"
           placeholder="Location (optional)…"
@@ -463,7 +482,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
         >
           {locating ? '…' : geo ? 'GPS' : 'GPS'}
         </button>
-      </div>
+      </div>}
 
       {/* Footer: audience + actions */}
       <div className="flex items-center justify-between gap-3 px-3 py-2 bg-base-200">

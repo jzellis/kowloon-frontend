@@ -18,15 +18,11 @@ export default function ServerInfo({ server = MOCK_SERVER }) {
   return (
     <div className="flex flex-col gap-0 border-b-2 border-base-300 pb-5">
       {/* Icon + name */}
-      <div className="flex items-stretch gap-0 mb-4">
-        <div className="bg-primary flex items-center justify-center w-12 shrink-0">
-          <img src={server.icon} alt={server.name} className="w-8 h-8 object-contain" />
-        </div>
-        <div className="bg-secondary flex items-center px-3 flex-1 min-w-0">
-          <span className="font-display text-xl tracking-widest text-secondary-content truncate">
-            {server.name}
-          </span>
-        </div>
+      <div className="flex items-center gap-3 mb-4">
+        <img src={server.icon} alt={server.name} className="w-10 h-10 object-contain shrink-0" />
+        <span className="font-display text-4xl tracking-wide text-base-content leading-none">
+          {server.name}
+        </span>
       </div>
 
       {/* Location */}

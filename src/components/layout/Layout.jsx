@@ -26,7 +26,7 @@ export default function Layout() {
     <div className="min-h-screen bg-base-200">
       <Header />
       <div className="w-full px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-3"><Sidebar /></div>
           <main className="lg:col-span-6"><Outlet /></main>
           <div className="lg:col-span-3"><RightSidebar /></div>

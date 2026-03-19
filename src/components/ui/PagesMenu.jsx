@@ -35,7 +35,7 @@ const MOCK_PAGES = [
 export default function PagesMenu({ pages = MOCK_PAGES }) {
   return (
     <div className="flex flex-col gap-0 border-b-2 border-base-300 pb-5">
-      <h3 className="font-display text-lg tracking-widest text-base-content mb-3">Pages</h3>
+      <h3 className="font-display text-3xl tracking-wide text-base-content mb-3">Pages</h3>
       <nav>
         <ul className="flex flex-col gap-0">
           {pages.map((page) => (

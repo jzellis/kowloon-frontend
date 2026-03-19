@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 200 200"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg">
+  <!-- Hexagonal border -->
+  <g id="layer3">
+    <path
+       style="fill:none;stroke:currentColor;stroke-width:6.75668;stroke-dasharray:none;paint-order:markers stroke fill"
+       id="path2"
+       transform="matrix(1.7760201,0,0,1.7760201,-32.924208,-82.846169)"
+       d="m 31.542594,126.76095 10e-7,-47.616389 a 2.0642639,2.0642639 120 0 1 1.032132,-1.787705 L 73.811734,53.54866 a 2.0642639,2.0642639 1.2609945e-6 0 1 2.064263,0 L 117.113,77.356858 a 2.0642639,2.0642639 60.000001 0 1 1.03214,1.787705 l -1e-5,47.616397 a 2.0642639,2.0642639 120 0 1 -1.03213,1.7877 l -41.237005,23.8082 a 2.0642639,2.0642639 1.2609945e-6 0 1 -2.064264,0 l -41.237005,-23.8082 a 2.0642639,2.0642639 60.000001 0 1 -1.032132,-1.78771 z" />
+  </g>
+  <!-- Media icon (camera body + lens) -->
+  <g id="layer6">
+    <path
+       id="rect35"
+       style="fill:currentColor;stroke:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="m 90.02913,54.804924 a 13.856407,13.856407 0 0 0 -11.999784,6.928259 l -4.656564,8.064624 a 4.485497,4.485497 0 0 0 -0.286804,0.594279 h -4.72891 v -5.99395 H 55.160457 v 5.99395 h -0.875398 a 7.9999999,7.9999999 0 0 0 -8.000029,8.000028 v 52.453126 a 7.9999999,7.9999999 0 0 0 8.000029,8.00003 h 91.430081 a 7.9999999,7.9999999 0 0 0 8.00003,-8.00003 V 78.392114 a 7.9999999,7.9999999 0 0 0 -8.00003,-8.000028 h -18.49345 a 4.7540583,4.7540583 0 0 0 -0.63045,-2.135787 l -3.76618,-6.523116 a 13.856408,13.856408 0 0 0 -12.0003,-6.928259 z" />
+    <!-- Lens — white so it reads as a hole over the colored camera body -->
+    <circle
+       style="fill:white;stroke:none;"
+       id="path35"
+       cx="100"
+       cy="100"
+       r="23.507917" />
+  </g>
+</svg>

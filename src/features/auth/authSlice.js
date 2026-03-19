@@ -101,6 +101,13 @@ const authSlice = createSlice({
     clearError(state) {
       state.error = null
     },
+    // Dev-only: toggle mock user without hitting the server
+    devSetUser(state, action) {
+      state.user = action.payload
+      state.token = action.payload ? 'dev-token' : null
+      state.sessionChecked = true
+      state.status = action.payload ? 'succeeded' : 'idle'
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -165,5 +172,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { setServerUrl, clearError } = authSlice.actions
+export const { setServerUrl, clearError, devSetUser } = authSlice.actions
 export default authSlice.reducer
