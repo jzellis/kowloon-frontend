@@ -23,13 +23,13 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="h-screen flex flex-col bg-base-200">
       <Header />
-      <div className="w-full px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-3"><Sidebar /></div>
-          <main className="lg:col-span-6"><Outlet /></main>
-          <div className="lg:col-span-3"><RightSidebar /></div>
+      <div className="flex-1 overflow-hidden px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 h-full">
+          <div className="lg:col-span-3 overflow-y-auto py-6"><Sidebar /></div>
+          <main className="lg:col-span-6 lg:px-20 overflow-y-auto py-6"><Outlet /></main>
+          <div className="lg:col-span-3 overflow-y-auto py-6"><RightSidebar /></div>
         </div>
       </div>
     </div>
