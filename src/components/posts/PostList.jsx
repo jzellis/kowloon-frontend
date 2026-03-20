@@ -92,20 +92,20 @@ function MediaGrid({ posts, page, totalPages, onPageChange }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function PostList({ posts = [], page, totalPages, onPageChange, loading, error }) {
+export default function PostList({ posts = [], page, totalPages, onPageChange, loading, error, ignoreTypeFilter = false }) {
   const { activeTypes } = useSelector((state) => state.feed)
 
   if (loading) return <Spinner centered />
   if (error)   return <ErrorState message={error} onRetry={() => onPageChange(page)} />
   if (!posts.length) return <EmptyState message="No posts yet." />
 
-  const visible = activeTypes.length > 0
+  const visible = (!ignoreTypeFilter && activeTypes.length > 0)
     ? posts.filter((p) => activeTypes.includes(p.type))
     : posts
 
   if (!visible.length) return <EmptyState message="No posts of the selected types." />
 
-  const isMediaGrid = activeTypes.length === 1 && activeTypes[0] === 'Media'
+  const isMediaGrid = !ignoreTypeFilter && activeTypes.length === 1 && activeTypes[0] === 'Media'
 
   if (isMediaGrid) {
     return <MediaGrid posts={visible} page={page} totalPages={totalPages} onPageChange={onPageChange} />

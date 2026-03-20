@@ -2,6 +2,7 @@
 // Handles type-specific rendering: linked titles for Link posts, media attachments for Media posts.
 // Props: post object
 
+import { Link } from 'react-router-dom'
 import { marked } from 'marked'
 import AudioPlayer from '../ui/AudioPlayer'
 
@@ -82,14 +83,21 @@ function Attachments({ attachments = [], featuredImage = null }) {
 export default function PostBody({ post }) {
   const raw  = post?.source ?? post?.content ?? ''
   const html = marked.parse(raw)
-  const isLink = post?.type === 'Link'
+  const isLink  = post?.type === 'Link'
+  const postUrl = post?.id ? `/posts/${encodeURIComponent(post.id)}` : null
+  const titleLinksToPost = ['Article', 'Media'].includes(post?.type)
 
   return (
     <div className="font-reading text-base-content leading-relaxed">
       {post?.name && (
         isLink
           ? <LinkTitle post={post} />
-          : <h1 className="font-display text-5xl mt-4 mb-16">{post.name}</h1>
+          : <h1 className="font-display text-5xl mt-4 mb-16">
+              {titleLinksToPost && postUrl
+                ? <Link to={postUrl} className="hover:text-primary transition-colors">{post.name}</Link>
+                : post.name
+              }
+            </h1>
       )}
       <div
         className="prose prose-sm max-w-none"
