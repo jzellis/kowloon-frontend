@@ -27,7 +27,7 @@ export default function ServerInfo({ server = MOCK_SERVER }) {
 
       {/* Location */}
       {(server.city || server.country) && (
-        <div className="flex items-center gap-1.5 mb-3 text-base-content/50">
+        <div className="flex items-center gap-1.5 mb-3 text-base-content/70 pl-[52px]">
           <MapPin className="w-3 h-3 shrink-0" />
           <span className="font-ui text-xs uppercase tracking-widest">
             {[server.city, server.region, server.country].filter(Boolean).join(', ')}
@@ -37,7 +37,7 @@ export default function ServerInfo({ server = MOCK_SERVER }) {
 
       {/* Description */}
       {server.description && (
-        <p className="font-reading text-sm text-base-content/80 leading-relaxed">
+        <p className="font-reading text-sm text-base-content/80 leading-relaxed pl-[52px]">
           {server.description}
         </p>
       )}

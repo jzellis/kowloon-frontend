@@ -16,14 +16,14 @@ function LinkTitle({ post }) {
 
   return (
     <div className="mb-3">
-      <h1 className="font-display text-5xl mb-12">
+      <h1 className="font-display text-4xl lg:text-5xl mb-12">
         {post.href
           ? <a href={post.href} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">{post.name}</a>
           : post.name
         }
       </h1>
       {domain && (
-        <p className="font-ui text-xs uppercase tracking-widest text-base-content/40 mt-0.5">{domain}</p>
+        <p className="font-ui text-sm uppercase tracking-widest text-base-content/60 mt-0.5">{domain}</p>
       )}
     </div>
   )
@@ -92,7 +92,7 @@ export default function PostBody({ post }) {
       {post?.name && (
         isLink
           ? <LinkTitle post={post} />
-          : <h1 className="font-display text-5xl mt-4 mb-16">
+          : <h1 className="font-display text-4xl lg:text-5xl mt-4 mb-16">
               {titleLinksToPost && postUrl
                 ? <Link to={postUrl} className="hover:text-primary transition-colors">{post.name}</Link>
                 : post.name
@@ -100,7 +100,7 @@ export default function PostBody({ post }) {
             </h1>
       )}
       <div
-        className="prose prose-sm max-w-none"
+        className="prose prose-sm max-w-none text-[13.5px] [&_p]:leading-[1.45] [&_p]:text-left [&_p]:font-[450] [&_h2]:text-lg lg:[&_h2]:text-xl [&_h3]:text-base lg:[&_h3]:text-lg"
         dangerouslySetInnerHTML={{ __html: html }}
       />
 

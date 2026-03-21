@@ -138,7 +138,7 @@ export default function PopularPosts({ posts = MOCK_POPULAR }) {
                           {post.name}
                         </span>
                       )}
-                      <p className={`font-reading text-base-content/60 leading-snug line-clamp-2 ${post.name ? 'text-xs' : 'text-sm'}`}>
+                      <p className={`font-reading text-base-content/75 leading-snug line-clamp-2 ${post.name ? 'text-sm' : 'text-base'}`}>
                         {post.summary}
                       </p>
                     </div>
@@ -148,15 +148,15 @@ export default function PopularPosts({ posts = MOCK_POPULAR }) {
 
                 {/* Author + counts */}
                 <div className="flex items-center justify-between pl-3">
-                  <span className="font-ui text-xs font-bold uppercase tracking-widest text-base-content/75">
+                  <span className="font-ui text-sm font-bold uppercase tracking-widest text-base-content/75">
                     {post.attributedTo.displayName}
                   </span>
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 font-ui text-xs uppercase tracking-widest text-base-content/40">
+                    <span className="flex items-center gap-1 font-ui text-xs uppercase tracking-widest text-base-content/65">
                       <Smile size={11} />
                       {post.reactCount}
                     </span>
-                    <span className="flex items-center gap-1 font-ui text-xs uppercase tracking-widest text-base-content/40">
+                    <span className="flex items-center gap-1 font-ui text-xs uppercase tracking-widest text-base-content/65">
                       <MessageSquare size={11} />
                       {post.replyCount}
                     </span>

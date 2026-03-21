@@ -100,7 +100,7 @@ export default function ActiveGroups({ groups = MOCK_GROUPS }) {
 
             {/* Icon column + text column */}
             <div className="flex items-start gap-2">
-              <div className="flex items-center self-start" style={{ minHeight: '36px' }}>
+              <div className="w-11 flex items-center justify-center self-start shrink-0" style={{ minHeight: '36px' }}>
                 <GroupAvatar group={group} />
               </div>
               <div className="flex flex-col min-w-0 flex-1">
@@ -109,7 +109,7 @@ export default function ActiveGroups({ groups = MOCK_GROUPS }) {
                     {group.name}
                   </span>
                 </div>
-                <span className="font-ui text-[10px] uppercase tracking-widest text-base-content/40">
+                <span className="font-ui text-xs uppercase tracking-widest text-base-content/65">
                   {group.memberCount.toLocaleString()} members
                 </span>
               </div>
@@ -117,11 +117,11 @@ export default function ActiveGroups({ groups = MOCK_GROUPS }) {
 
             {/* Most recent post snippet */}
             {group.recentPost && (
-              <div className="flex flex-col gap-0.5 pl-11">
-                <p className="font-reading text-xs text-base-content/60 leading-snug line-clamp-2">
+              <div className="flex flex-col gap-0.5 pl-[52px]">
+                <p className="font-reading text-base text-base-content/75 leading-snug line-clamp-2">
                   {group.recentPost.summary}
                 </p>
-                <span className="font-ui text-[10px] uppercase tracking-widest text-base-content/35">
+                <span className="font-ui text-xs uppercase tracking-widest text-base-content/65">
                   {group.recentPost.attributedTo?.displayName} · {relativeTime(group.recentPost.published)}
                 </span>
               </div>

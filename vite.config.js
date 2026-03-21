@@ -8,4 +8,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@react-native-async-storage/async-storage'],
   },
+  server: {
+    allowedHosts: ['prayers-blend-intelligence-comedy.trycloudflare.com'],
+  },
 })

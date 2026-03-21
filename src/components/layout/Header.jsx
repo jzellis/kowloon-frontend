@@ -3,6 +3,20 @@ import { useDispatch, useSelector } from 'react-redux'
 import { logoutAsync } from '../../features/auth/authSlice'
 import { useClient } from '../../hooks/useClient'
 
+// TODO: pull from server info API / Redux slice
+const SERVER_NAME = 'My Kowloon Server'
+const SERVER_PAGES = [
+  { label: 'About',    slug: 'about',    children: [
+    { label: 'Rules & Guidelines', slug: 'rules' },
+    { label: 'Privacy Policy',     slug: 'privacy' },
+  ]},
+  { label: 'Projects', slug: 'projects', children: [
+    { label: 'Kowloon',       slug: 'kowloon' },
+    { label: 'Music Archive', slug: 'music-archive' },
+  ]},
+  { label: 'Contact',  slug: 'contact',  children: [] },
+]
+
 function BellIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,16 +67,14 @@ export function Header() {
     <header className="bg-secondary border-b-4 border-primary sticky top-0 z-50">
       <nav className="flex items-stretch h-16">
 
-        {/* ── Logo ─────────────────────────────────────────────── */}
+        {/* ── Logo — always a plain home link ── */}
         <Link to="/" className="flex items-stretch shrink-0 hover:opacity-90 transition-opacity">
-          {/* Yellow box holding the server icon */}
           <div className="bg-primary flex items-center justify-center w-16">
             <img className="h-10 w-10 object-contain" src="/logo.png" alt="Kowloon" />
           </div>
-          {/* Site name */}
-          <div className="flex items-center px-5 bg-black/20">
-            <span className="font-display text-3xl tracking-[0.15em] text-base-100">
-              KOWLOON
+          <div className="flex items-center px-4 lg:px-5 bg-black/20">
+            <span className="font-display text-2xl lg:text-3xl tracking-[0.15em] text-base-100 whitespace-nowrap">
+              {SERVER_NAME}
             </span>
           </div>
         </Link>
@@ -135,8 +147,8 @@ export function Header() {
               </ul>
             </div>
           ) : (
-            /* Logged-out: sign in / register */
-            <div className="flex items-center gap-2">
+            /* Logged-out: sign in / register — desktop only, mobile uses hamburger */
+            <div className="hidden lg:flex items-center gap-2">
               <Link
                 to="/login"
                 className="px-4 py-2 font-ui text-xs uppercase tracking-widest text-base-300/70 hover:text-primary transition-colors"
@@ -162,18 +174,72 @@ export function Header() {
             </button>
             <ul
               tabIndex={0}
-              className="dropdown-content p-0 mt-0 bg-neutral w-52 border-t-4 border-primary z-[1]"
+              className="dropdown-content p-0 mt-0 bg-neutral w-72 border-t-4 border-primary z-[1]"
             >
+              {/* Nav links */}
               {NAV_LINKS.map(({ to, label }) => (
                 <li key={to}>
                   <Link
                     to={to}
-                    className="block px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors"
+                    className="block px-4 py-3 font-ui text-sm uppercase tracking-widest text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors"
                   >
                     {label}
                   </Link>
                 </li>
               ))}
+
+              {/* Server info */}
+              <li className="px-4 py-4 border-t border-white/10">
+                <p className="font-reading text-sm text-base-300/75 leading-relaxed">
+                  A small, friendly server for writers, musicians, and people who think too much.
+                </p>
+              </li>
+
+              {/* Pages */}
+              <li className="px-4 pt-1 pb-1 font-ui text-xs uppercase tracking-widest text-base-300/40 border-t border-white/10">
+                Pages
+              </li>
+              {SERVER_PAGES.map((page) => (
+                <li key={page.slug}>
+                  <Link
+                    to={`/pages/${page.slug}`}
+                    className="block px-4 py-2 font-ui text-sm uppercase tracking-widest text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors"
+                  >
+                    {page.label}
+                  </Link>
+                  {page.children?.map((child) => (
+                    <Link
+                      key={child.slug}
+                      to={`/pages/${child.slug}`}
+                      className="block pl-8 pr-4 py-1.5 font-ui text-xs uppercase tracking-widest text-base-300/50 hover:text-primary hover:bg-black/20 transition-colors"
+                    >
+                      {child.label}
+                    </Link>
+                  ))}
+                </li>
+              ))}
+
+              {/* Sign in / Register — logged-out only */}
+              {!user && (
+                <>
+                  <li className="border-t border-white/10">
+                    <Link
+                      to="/login"
+                      className="block px-4 py-3 font-ui text-sm uppercase tracking-widest text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors"
+                    >
+                      Sign in
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/register"
+                      className="block px-4 py-3 font-ui text-sm uppercase tracking-widest bg-primary text-secondary hover:bg-base-100 transition-colors"
+                    >
+                      Register
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 

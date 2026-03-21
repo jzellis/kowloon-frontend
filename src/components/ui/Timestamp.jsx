@@ -25,7 +25,7 @@ export default function Timestamp({ date, absolute = false, to }) {
     <time
       dateTime={new Date(date).toISOString()}
       title={full}
-      className="font-ui text-xs text-base-content/50 uppercase tracking-widest"
+      className="font-ui text-sm text-base-content/70 uppercase tracking-widest"
     >
       {display}
     </time>

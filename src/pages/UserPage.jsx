@@ -74,7 +74,7 @@ function CircleChip({ circle }) {
         : <CircleIcon type="circle" size="sm" />
       }
       <span className="font-ui text-xs uppercase tracking-widest text-base-content/80">{circle.name}</span>
-      <span className="font-ui text-[10px] uppercase tracking-widest text-base-content/40">{circle.memberCount}</span>
+      <span className="font-ui text-xs uppercase tracking-widest text-base-content/65">{circle.memberCount}</span>
     </Link>
   )
 }
@@ -102,11 +102,11 @@ export default function UserPage() {
               {user.displayName}
             </h1>
             <div className="flex items-center gap-3">
-              <span className="font-ui text-xs uppercase tracking-widest text-base-content/50">
+              <span className="font-ui text-xs uppercase tracking-widest text-base-content/70">
                 {user.id}
               </span>
               {user.profile.pronouns && (
-                <span className="font-ui text-xs uppercase tracking-widest text-base-content/35">
+                <span className="font-ui text-xs uppercase tracking-widest text-base-content/65">
                   {user.profile.pronouns}
                 </span>
               )}

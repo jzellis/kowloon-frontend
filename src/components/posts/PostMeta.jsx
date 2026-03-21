@@ -30,7 +30,7 @@ export default function PostMeta({ post }) {
             </span>
         }
         <div className="flex items-center gap-2">
-          <span className="font-ui text-xs text-base-content/50 truncate">
+          <span className="font-ui text-sm text-base-content/65 truncate">
             {author?.id}
           </span>
           <Timestamp date={post?.published} to={timestampTo} />

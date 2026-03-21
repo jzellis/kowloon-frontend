@@ -101,7 +101,7 @@ export default function CirclePostsPage() {
       <div className="flex flex-col gap-1 pb-4 border-b-2 border-base-300">
         <Link
           to={`/circles/${encodeURIComponent(id)}`}
-          className="flex items-center gap-1.5 font-ui text-xs uppercase tracking-widest text-base-content/40 hover:text-primary transition-colors self-start mb-2"
+          className="flex items-center gap-1.5 font-ui text-xs uppercase tracking-widest text-base-content/65 hover:text-primary transition-colors self-start mb-2"
         >
           <ArrowLeft size={13} /> {circle.name}
         </Link>

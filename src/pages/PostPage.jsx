@@ -84,7 +84,7 @@ export default function PostPage() {
     <div className="flex flex-col gap-8">
       <Link
         to="/"
-        className="flex items-center gap-1.5 font-ui text-xs uppercase tracking-widest text-base-content/40 hover:text-primary transition-colors self-start"
+        className="flex items-center gap-1.5 font-ui text-xs uppercase tracking-widest text-base-content/65 hover:text-primary transition-colors self-start"
       >
         <ArrowLeft size={13} /> Back
       </Link>

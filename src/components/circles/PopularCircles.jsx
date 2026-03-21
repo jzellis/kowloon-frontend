@@ -88,7 +88,7 @@ export default function PopularCircles({ circles = MOCK_CIRCLES }) {
             <Link to={`/circles/${encodeURIComponent(circle.id)}`} className="flex flex-col gap-2 py-4 px-3 -mx-3 hover:bg-base-300 transition-colors">
             {/* Icon column + text column */}
             <div className="flex items-start gap-2">
-              <div className="flex items-center self-start" style={{ minHeight: '36px' }}>
+              <div className="w-11 flex items-center justify-center self-start shrink-0" style={{ minHeight: '36px' }}>
                 <CircleAvatar circle={circle} />
               </div>
               <div className="flex flex-col gap-0.5 min-w-0 flex-1">
@@ -111,7 +111,7 @@ export default function PopularCircles({ circles = MOCK_CIRCLES }) {
                   </div>
                 )}
                 {circle.summary && (
-                  <p className="font-ui text-xs text-base-content/60 leading-relaxed line-clamp-2 mt-1">
+                  <p className="font-ui text-base text-base-content/75 leading-relaxed line-clamp-2 mt-1">
                     {circle.summary}
                   </p>
                 )}

@@ -24,21 +24,21 @@ const MOCK_CIRCLE = {
   memberCount: 91,
   attributedTo: { id: '@recordhead@kwln.org', username: 'recordhead', displayName: 'Record Head', profile: { icon: 'https://picsum.photos/seed/recordhead/200/200' } },
   members: [
-    { id: '@jzellis@kwln.org',       username: 'jzellis',       displayName: 'Joshua Ellis',       profile: { icon: 'https://picsum.photos/seed/jzellis/200/200' } },
-    { id: '@cityhacker@kwln.org',    username: 'cityhacker',    displayName: 'City Hacker',        profile: { icon: 'https://picsum.photos/seed/cityhacker/200/200' } },
-    { id: '@designthink@kwln.org',   username: 'designthink',   displayName: 'Design Thinking',    profile: { icon: 'https://picsum.photos/seed/designthink/200/200' } },
-    { id: '@recordhead@kwln.org',    username: 'recordhead',    displayName: 'Record Head',        profile: { icon: 'https://picsum.photos/seed/recordhead/200/200' } },
-    { id: '@milesahead@kwln.org',    username: 'milesahead',    displayName: 'Miles Ahead',        profile: { icon: 'https://picsum.photos/seed/milesahead/200/200' } },
-    { id: '@bluebird@kwln.org',      username: 'bluebird',      displayName: 'Bluebird Parker',    profile: { icon: 'https://picsum.photos/seed/bluebird/200/200' } },
-    { id: '@trane@kwln.org',         username: 'trane',         displayName: 'A. Trane',           profile: { icon: 'https://picsum.photos/seed/trane/200/200' } },
-    { id: '@mingusmouth@kwln.org',   username: 'mingusmouth',   displayName: 'Mingus Mouth',       profile: { icon: 'https://picsum.photos/seed/mingusmouth/200/200' } },
-    { id: '@rollinsstone@kwln.org',  username: 'rollinsstone',  displayName: 'Rollins Stone',      profile: { icon: 'https://picsum.photos/seed/rollinsstone/200/200' } },
-    { id: '@koloursofbop@kwln.org',  username: 'koloursofbop',  displayName: 'Kolours of Bop',     profile: { icon: 'https://picsum.photos/seed/koloursofbop/200/200' } },
-    { id: '@voiceofeve@kwln.org',    username: 'voiceofeve',    displayName: 'Eve Cassidy-Reed',   profile: { icon: 'https://picsum.photos/seed/voiceofeve/200/200' } },
-    { id: '@waxpoetic@kwln.org',     username: 'waxpoetic',     displayName: 'Wax Poetic',         profile: { icon: 'https://picsum.photos/seed/waxpoetic/200/200' } },
-    { id: '@sidemansteve@kwln.org',  username: 'sidemansteve',  displayName: 'Sideman Steve',      profile: { icon: 'https://picsum.photos/seed/sidemansteve/200/200' } },
-    { id: '@lowendbass@kwln.org',    username: 'lowendbass',    displayName: 'Low End Theory',     profile: { icon: 'https://picsum.photos/seed/lowendbass/200/200' } },
-    { id: '@clubbackroom@kwln.org',  username: 'clubbackroom',  displayName: 'The Backroom',       profile: { icon: 'https://picsum.photos/seed/clubbackroom/200/200' } },
+    { id: '@jzellis@kwln.org',       username: 'jzellis',       displayName: 'Joshua Ellis',       profile: { icon: 'https://picsum.photos/seed/jzellis/200/200',       bio: 'Writer, musician, and general troublemaker. Making things on the internet since 1994.' } },
+    { id: '@cityhacker@kwln.org',    username: 'cityhacker',    displayName: 'City Hacker',        profile: { icon: 'https://picsum.photos/seed/cityhacker/200/200',    bio: 'Urban infrastructure obsessive. I think about sewers more than is probably healthy.' } },
+    { id: '@designthink@kwln.org',   username: 'designthink',   displayName: 'Design Thinking',    profile: { icon: 'https://picsum.photos/seed/designthink/200/200',   bio: 'Graphic designer. Modernist sympathizer. Will argue about kerning.' } },
+    { id: '@recordhead@kwln.org',    username: 'recordhead',    displayName: 'Record Head',        profile: { icon: 'https://picsum.photos/seed/recordhead/200/200',    bio: 'Collector, obsessive, and occasional DJ. Blue Note completist. He/him.' } },
+    { id: '@milesahead@kwln.org',    username: 'milesahead',    displayName: 'Miles Ahead',        profile: { icon: 'https://picsum.photos/seed/milesahead/200/200',    bio: 'Trumpet player and armchair theorist. Kind of Blue, obviously.' } },
+    { id: '@bluebird@kwln.org',      username: 'bluebird',      displayName: 'Bluebird Parker',    profile: { icon: 'https://picsum.photos/seed/bluebird/200/200',      bio: 'Alto sax. Bebop or nothing. Do not talk to me about smooth jazz.' } },
+    { id: '@trane@kwln.org',         username: 'trane',         displayName: 'A. Trane',           profile: { icon: 'https://picsum.photos/seed/trane/200/200',         bio: 'A Love Supreme. Sheets of sound. Living in the changes.' } },
+    { id: '@mingusmouth@kwln.org',   username: 'mingusmouth',   displayName: 'Mingus Mouth',       profile: { icon: 'https://picsum.photos/seed/mingusmouth/200/200',   bio: 'Bassist. Composer. Opinionated about everything, especially bassists.' } },
+    { id: '@rollinsstone@kwln.org',  username: 'rollinsstone',  displayName: 'Rollins Stone',      profile: { icon: 'https://picsum.photos/seed/rollinsstone/200/200',  bio: 'Tenor man. Practised on the Williamsburg Bridge so I wouldn\'t bother the neighbours.' } },
+    { id: '@koloursofbop@kwln.org',  username: 'koloursofbop',  displayName: 'Kolours of Bop',     profile: { icon: 'https://picsum.photos/seed/koloursofbop/200/200',  bio: 'Visual artist inspired by the music. Trying to paint what Coltrane sounds like.' } },
+    { id: '@voiceofeve@kwln.org',    username: 'voiceofeve',    displayName: 'Eve Cassidy-Reed',   profile: { icon: 'https://picsum.photos/seed/voiceofeve/200/200',    bio: 'Vocalist and composer. Jazz, soul, and the bits in between. London via Lagos.' } },
+    { id: '@waxpoetic@kwln.org',     username: 'waxpoetic',     displayName: 'Wax Poetic',         profile: { icon: 'https://picsum.photos/seed/waxpoetic/200/200',     bio: 'Vinyl only. If it\'s not on wax it doesn\'t count. ~14,000 records and counting.' } },
+    { id: '@sidemansteve@kwln.org',  username: 'sidemansteve',  displayName: 'Sideman Steve',      profile: { icon: 'https://picsum.photos/seed/sidemansteve/200/200',  bio: 'Session guitarist. I\'ve played on records you\'ve heard. You don\'t know my name.' } },
+    { id: '@lowendbass@kwln.org',    username: 'lowendbass',    displayName: 'Low End Theory',     profile: { icon: 'https://picsum.photos/seed/lowendbass/200/200',    bio: 'Electric bass. The foundation of everything. Nobody notices until it stops.' } },
+    { id: '@clubbackroom@kwln.org',  username: 'clubbackroom',  displayName: 'The Backroom',       profile: { icon: 'https://picsum.photos/seed/clubbackroom/200/200',  bio: 'A small jazz club in Dalston. Gigs most Thursdays. Cash bar. No stag dos.' } },
   ],
 }
 
@@ -76,7 +76,7 @@ export default function CirclePage() {
       <div
         className="sticky top-0 bg-base-100 z-10 flex flex-col gap-4 pt-6 pb-6 px-4 border-b-2 border-base-300"
         style={{
-          filter: `drop-shadow(${shadowProgress * 8}px ${shadowProgress * 8}px ${shadowProgress * 8}px rgba(0,0,0,${(shadowProgress * 0.35).toFixed(3)}))`,
+          filter: `drop-shadow(${shadowProgress * 8}px ${shadowProgress * 8}px ${shadowProgress * 2}px rgba(0,0,0,${(shadowProgress * 0.35).toFixed(3)}))`,
           transform: `translate(${shadowProgress * -3}px, ${shadowProgress * -3}px)`,
         }}
       >
@@ -91,7 +91,7 @@ export default function CirclePage() {
           {/* Name + creator + count + description + posts link */}
           <div className="flex flex-col gap-3 min-w-0 pt-1 flex-1">
             <h1 className="font-display text-4xl leading-none tracking-wide">{circle.name}</h1>
-            <div className="flex items-center gap-2 font-ui text-xs uppercase tracking-widest text-base-content/50">
+            <div className="flex items-center gap-2 font-ui text-sm uppercase tracking-widest text-base-content/70">
               <Link to={`/users/${encodeURIComponent(circle.attributedTo.id)}`} className="font-bold hover:text-primary transition-colors">
                 {circle.attributedTo.displayName}
               </Link>
@@ -148,12 +148,15 @@ export default function CirclePage() {
               to={`/users/${encodeURIComponent(member.id)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 py-3 border-b border-base-300 hover:bg-base-200 px-2 -mx-2 transition-colors"
+              className="flex items-start gap-3 py-5 border-b border-base-300 hover:bg-base-200 px-2 -mx-2 transition-colors"
             >
               <UserAvatar user={member} size="sm" />
-              <div className="flex flex-col min-w-0">
+              <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="font-ui text-sm font-bold text-base-content">{member.displayName}</span>
-                <span className="font-ui text-xs uppercase tracking-widest text-base-content/40">{member.id}</span>
+                <span className="font-ui text-sm uppercase tracking-widest text-base-content/65">{member.id}</span>
+                {member.profile?.bio && (
+                  <p className="font-reading text-base text-base-content/75 leading-snug mt-1">{member.profile.bio}</p>
+                )}
               </div>
             </Link>
           ))}

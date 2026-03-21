@@ -27,9 +27,9 @@ export default function Layout() {
       <Header />
       <div className="flex-1 overflow-hidden px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 h-full">
-          <div className="lg:col-span-3 overflow-y-auto py-6"><Sidebar /></div>
-          <main className="lg:col-span-6 lg:px-20 overflow-y-auto py-6"><Outlet /></main>
-          <div className="lg:col-span-3 overflow-y-auto py-6"><RightSidebar /></div>
+          <div className="hidden lg:block lg:col-span-3 overflow-y-auto py-6"><Sidebar /></div>
+          <main className="col-span-1 lg:col-span-6 lg:px-8 overflow-y-auto py-6"><Outlet /></main>
+          <div className="hidden lg:block lg:col-span-3 overflow-y-auto py-6"><RightSidebar /></div>
         </div>
       </div>
     </div>

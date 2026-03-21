@@ -35,18 +35,21 @@ const MOCK_PAGES = [
 export default function PagesMenu({ pages = MOCK_PAGES }) {
   return (
     <div className="flex flex-col gap-0 border-b-2 border-base-300 pb-5">
-      <h3 className="font-display text-3xl tracking-wide text-base-content mb-3">Pages</h3>
-      <nav>
+      <div className="flex items-center gap-2 mb-3" style={{ minHeight: '36px' }}>
+        <img src="/page.svg" aria-hidden="true" className="w-11 h-11 shrink-0 opacity-50" />
+        <h3 className="font-display text-3xl tracking-wide text-base-content leading-none">Pages</h3>
+      </div>
+      <nav className="pl-[52px]">
         <ul className="flex flex-col gap-0">
           {pages.map((page) => (
             <li key={page.id}>
               <Link
                 to={`/pages/${page.slug}`}
-                className="flex items-center justify-between py-1.5 font-ui text-xs uppercase tracking-widest text-base-content/70 hover:text-primary transition-colors group"
+                className="flex items-center justify-between py-1.5 font-ui text-sm uppercase tracking-widest text-base-content/80 hover:text-primary transition-colors group"
               >
                 {page.name}
                 {page.children?.length > 0 && (
-                  <ChevronRight className="w-3 h-3 text-base-content/30 group-hover:text-primary transition-colors" />
+                  <ChevronRight className="w-3 h-3 text-base-content/55 group-hover:text-primary transition-colors" />
                 )}
               </Link>
 
@@ -57,7 +60,7 @@ export default function PagesMenu({ pages = MOCK_PAGES }) {
                     <li key={child.id}>
                       <Link
                         to={`/pages/${child.slug}`}
-                        className="block pl-3 py-1 font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-primary transition-colors"
+                        className="block pl-3 py-1 font-ui text-sm uppercase tracking-widest text-base-content/70 hover:text-primary transition-colors"
                       >
                         {child.name}
                       </Link>
