@@ -44,8 +44,8 @@ const NAV_LINKS = [
 const navLinkClass = ({ isActive }) =>
   `flex items-center h-full px-5 font-ui text-xs uppercase tracking-widest transition-colors ${
     isActive
-      ? 'text-base-100 border-b-4 border-primary -mb-[4px]'
-      : 'text-base-300/70 hover:text-base-100 hover:bg-black/20'
+      ? 'text-secondary-content border-b-4 border-primary -mb-[4px]'
+      : 'text-base-300/70 hover:text-secondary-content hover:bg-black/20'
   }`
 
 export function Header() {
@@ -73,7 +73,7 @@ export function Header() {
             <img className="h-10 w-10 object-contain" src="/logo.png" alt="Kowloon" />
           </div>
           <div className="flex items-center px-4 lg:px-5 bg-black/20">
-            <span className="font-display text-2xl lg:text-3xl tracking-[0.15em] text-base-100 whitespace-nowrap">
+            <span className="font-display text-2xl lg:text-3xl tracking-[0.15em] text-secondary-content whitespace-nowrap">
               {SERVER_NAME}
             </span>
           </div>
@@ -126,20 +126,20 @@ export function Header() {
               </button>
               <ul
                 tabIndex={0}
-                className="dropdown-content p-0 mt-0 bg-neutral w-48 border-t-4 border-primary z-[1]"
+                className="dropdown-content p-0 mt-0 bg-base-100 dark:bg-neutral w-48 border-t-4 border-primary z-[1]"
               >
-                <li className="px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-300/40 border-b border-white/10 truncate">
+                <li className="px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-content/40 dark:text-white/60 border-b border-base-300 dark:border-white/10 truncate">
                   {userHandle}
                 </li>
                 <li>
-                  <Link to="/profile" className="block px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors">
+                  <Link to="/profile" className="block px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-content/70 dark:text-white/95 hover:text-primary hover:bg-base-200 dark:hover:bg-black/20 transition-colors">
                     Profile &amp; Settings
                   </Link>
                 </li>
                 <li>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors"
+                    className="w-full text-left px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-content/70 dark:text-white/95 hover:text-primary hover:bg-base-200 dark:hover:bg-black/20 transition-colors"
                   >
                     Log out
                   </button>
@@ -174,14 +174,14 @@ export function Header() {
             </button>
             <ul
               tabIndex={0}
-              className="dropdown-content p-0 mt-0 bg-neutral w-72 border-t-4 border-primary z-[1]"
+              className="dropdown-content p-0 mt-0 bg-base-100 dark:bg-neutral w-72 border-t-4 border-primary z-[1]"
             >
               {/* Nav links */}
               {NAV_LINKS.map(({ to, label }) => (
                 <li key={to}>
                   <Link
                     to={to}
-                    className="block px-4 py-3 font-ui text-sm uppercase tracking-widest text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors"
+                    className="block px-4 py-3 font-ui text-sm uppercase tracking-widest text-base-content/70 dark:text-white/95 hover:text-primary hover:bg-base-200 dark:hover:bg-black/20 transition-colors"
                   >
                     {label}
                   </Link>
@@ -189,21 +189,21 @@ export function Header() {
               ))}
 
               {/* Server info */}
-              <li className="px-4 py-4 border-t border-white/10">
-                <p className="font-reading text-sm text-base-300/75 leading-relaxed">
+              <li className="px-4 py-4 border-t border-base-300 dark:border-white/10">
+                <p className="font-reading text-sm text-base-content/75 dark:text-white/95 leading-relaxed">
                   A small, friendly server for writers, musicians, and people who think too much.
                 </p>
               </li>
 
               {/* Pages */}
-              <li className="px-4 pt-1 pb-1 font-ui text-xs uppercase tracking-widest text-base-300/40 border-t border-white/10">
+              <li className="px-4 pt-1 pb-1 font-ui text-xs uppercase tracking-widest text-base-content/40 dark:text-white/60 border-t border-base-300 dark:border-white/10">
                 Pages
               </li>
               {SERVER_PAGES.map((page) => (
                 <li key={page.slug}>
                   <Link
                     to={`/pages/${page.slug}`}
-                    className="block px-4 py-2 font-ui text-sm uppercase tracking-widest text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors"
+                    className="block px-4 py-2 font-ui text-sm uppercase tracking-widest text-base-content/70 dark:text-white/95 hover:text-primary hover:bg-base-200 dark:hover:bg-black/20 transition-colors"
                   >
                     {page.label}
                   </Link>
@@ -211,7 +211,7 @@ export function Header() {
                     <Link
                       key={child.slug}
                       to={`/pages/${child.slug}`}
-                      className="block pl-8 pr-4 py-1.5 font-ui text-xs uppercase tracking-widest text-base-300/50 hover:text-primary hover:bg-black/20 transition-colors"
+                      className="block pl-8 pr-4 py-1.5 font-ui text-xs uppercase tracking-widest text-base-content/50 dark:text-white/80 hover:text-primary hover:bg-base-200 dark:hover:bg-black/20 transition-colors"
                     >
                       {child.label}
                     </Link>
@@ -222,10 +222,10 @@ export function Header() {
               {/* Sign in / Register — logged-out only */}
               {!user && (
                 <>
-                  <li className="border-t border-white/10">
+                  <li className="border-t border-base-300 dark:border-white/10">
                     <Link
                       to="/login"
-                      className="block px-4 py-3 font-ui text-sm uppercase tracking-widest text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors"
+                      className="block px-4 py-3 font-ui text-sm uppercase tracking-widest text-base-content/70 dark:text-white/95 hover:text-primary hover:bg-base-200 dark:hover:bg-black/20 transition-colors"
                     >
                       Sign in
                     </Link>
@@ -233,7 +233,7 @@ export function Header() {
                   <li>
                     <Link
                       to="/register"
-                      className="block px-4 py-3 font-ui text-sm uppercase tracking-widest bg-primary text-secondary hover:bg-base-100 transition-colors"
+                      className="block px-4 py-3 font-ui text-sm uppercase tracking-widest bg-primary text-primary-content hover:opacity-90 transition-colors"
                     >
                       Register
                     </Link>

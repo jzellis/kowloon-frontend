@@ -5,6 +5,7 @@
 /* Inspired by Blue Note Records / 1950s midcentury print design.
    High contrast, vivid accent, warm paper tones, sharp geometry. */
 
+/* Light mode (default) */
 [data-theme="kowloon"] {
   color-scheme: light;
 
@@ -14,9 +15,9 @@
   --color-base-300: oklch(84% 0.028 85deg);
   --color-base-content: oklch(13% 0.008 265deg);
 
-  /* Primary — deep plum violet, darker than the navy bg */
-  --color-primary: oklch(34% 0.2 305deg);
-  --color-primary-content: oklch(97% 0.005 308deg);
+  /* Primary — desaturated steel blue */
+  --color-primary: oklch(63% 0.1 228deg);
+  --color-primary-content: oklch(97% 0.005 228deg);
 
   /* Secondary — medium navy */
   --color-secondary: oklch(42% 0.13 265deg);
@@ -48,6 +49,51 @@
   --radius-box: 0;
   --size-selector: 0.25rem;
   --border: 2px;
+}
+
+/* Dark mode — same aesthetic, dramatic night palette */
+@media (prefers-color-scheme: dark) {
+  [data-theme="kowloon"] {
+    color-scheme: dark;
+
+    /* Base — dark navy-charcoal, like a dimly lit room */
+    --color-base-100: oklch(12% 0.02 265deg);
+    --color-base-200: oklch(17% 0.02 265deg);
+    --color-base-300: oklch(24% 0.02 265deg);
+    --color-base-content: oklch(90% 0.018 85deg);
+
+    /* Primary — brighter steel blue for dark bg */
+    --color-primary: oklch(63% 0.1 228deg);
+    --color-primary-content: oklch(97% 0.005 228deg);
+
+    /* Secondary — header stays navy, slightly deeper */
+    --color-secondary: oklch(28% 0.14 265deg);
+    --color-secondary-content: oklch(90% 0.018 85deg);
+
+    /* Neutral — dark surface for dropdowns */
+    --color-neutral: oklch(20% 0.012 265deg);
+    --color-neutral-content: oklch(90% 0.018 85deg);
+  }
+}
+
+/* ─── Post Type Colors ───────────────────────────────────────────────────── */
+
+:root {
+  --post-color-note:    #b76c00;
+  --post-color-article: #006893;
+  --post-color-media:   #009084;
+  --post-color-link:    #417843;
+  --post-color-event:   #cc272e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --post-color-note:    #e8920a;
+    --post-color-article: #2ab4e8;
+    --post-color-media:   #00c4ae;
+    --post-color-link:    #62c278;
+    --post-color-event:   #ee5566;
+  }
 }
 
 /* ─── Font Utilities ─────────────────────────────────────────────────────── */
@@ -108,15 +154,13 @@
   /* Prose — markdown rendered content in post cards */
   .prose p {
     margin-bottom: 1.125em;
-    text-align: justify;
-    hyphens: auto;
   }
   .prose p:last-child {
     margin-bottom: 0;
   }
   .prose strong {
     font-weight: 700;
-    color: oklch(13% 0.008 265deg);
+    color: var(--color-base-content);
   }
   .prose em {
     font-style: italic;
@@ -145,7 +189,8 @@
     position: relative;
     padding: 0.5em 1.5em 0.5em 2.5em;
     margin: 1.5em 0;
-    color: oklch(30% 0.01 265deg);
+    color: var(--color-base-content);
+    opacity: 0.8;
     font-style: italic;
   }
   .prose blockquote::before {

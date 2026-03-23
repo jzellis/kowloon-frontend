@@ -34,7 +34,7 @@ export default function PostTypeIcon({ type, size = 'md' }) {
       className={`${SIZES[size]} shrink-0 flex items-center justify-center`}
       aria-label={config.label}
       title={config.label}
-      style={{ color: config.color }}
+      style={{ color: `var(--post-color-${type.toLowerCase()})` }}
     >
       <Icon className={SIZES[size]} />
     </span>

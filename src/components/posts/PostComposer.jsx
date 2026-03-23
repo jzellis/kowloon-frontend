@@ -1,9 +1,10 @@
-// PostComposer — inline expanding post editor at the top of the feed.
-// Collapsed: shows user avatar + prompt text. Clicking expands the full editor.
-// Expanded: type selector, rich text editor, audience picker, submit/cancel.
+// PostComposer — collapsed prompt that opens a full-screen modal editor.
+// Collapsed: shows user avatar + prompt text.
+// Expanded: modal overlay with type selector, rich text editor, audience picker, submit/cancel.
 // Auth-aware: renders nothing if not logged in.
 
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useClient } from '../../hooks/useClient'
@@ -158,6 +159,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
   const [error, setError]             = useState(null)
   const [editorKey, setEditorKey]     = useState(0)
   const [fetchingMeta, setFetchingMeta] = useState(false)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
 
   const composerRef = useRef(null)
   const fileInputRef = useRef(null)
@@ -183,7 +185,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
     setPostType(newType)
   }
 
-  // Collapse on outside click
+  // Collapse on outside click (collapsed state only)
   useEffect(() => {
     function handleClick(e) {
       if (composerRef.current && !composerRef.current.contains(e.target)) {
@@ -193,6 +195,30 @@ export default function PostComposer({ circles = [], onPostCreated }) {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [content, title, href])
+
+  // Lock body scroll, handle Escape, and track keyboard height when modal is open
+  useEffect(() => {
+    if (!expanded) return
+    document.body.style.overflow = 'hidden'
+    const handleKey = (e) => { if (e.key === 'Escape') handleCancel() }
+    document.addEventListener('keydown', handleKey)
+
+    // Shrink modal when on-screen keyboard appears
+    const vv = window.visualViewport
+    const updateKeyboard = () => {
+      if (!vv) return
+      setKeyboardHeight(Math.max(0, window.innerHeight - vv.height - vv.offsetTop))
+    }
+    vv?.addEventListener('resize', updateKeyboard)
+    updateKeyboard()
+
+    return () => {
+      document.body.style.overflow = ''
+      document.removeEventListener('keydown', handleKey)
+      vv?.removeEventListener('resize', updateKeyboard)
+      setKeyboardHeight(0)
+    }
+  }, [expanded])
 
   const handleCancel = () => {
     setExpanded(false)
@@ -325,208 +351,150 @@ export default function PostComposer({ circles = [], onPostCreated }) {
         className="flex items-center gap-3 px-4 py-3 bg-base-100 border-2 border-base-300 hover:border-primary cursor-text transition-colors mb-8 group"
       >
         <UserAvatar user={mockUser} size="sm" />
-        <span className="font-reading text-base-content/40 group-hover:text-base-content/60 transition-colors select-none">
+        <span className="font-reading text-base-content/40 dark:text-base-content/65 group-hover:text-base-content/70 dark:group-hover:text-base-content/85 transition-colors select-none">
           Write something…
         </span>
       </div>
     )
   }
 
-  // ── Expanded ──────────────────────────────────────────────────────────────
-  return (
-    <div ref={composerRef} className="flex flex-col gap-0 border-2 border-base-300 mb-8">
+  // ── Modal ─────────────────────────────────────────────────────────────────
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-end lg:justify-center p-4 lg:p-8">
 
-      {/* Type selector */}
-      <div className="flex items-center justify-between border-b-2 border-base-300 bg-base-200">
-        <PostTypeSelector value={postType} onChange={handleTypeChange} />
-        <Link
-          to="/posts/new"
-          className="px-4 py-2 font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-primary transition-colors"
-        >
-          Full editor →
-        </Link>
-      </div>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60" onClick={handleCancel} />
 
-      {/* Title — Article, Event, Link, Media */}
-      {hasTitle && (
-        <input
-          type="text"
-          placeholder="Title…"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-4 py-3 bg-base-100 font-display text-2xl tracking-wide text-base-content placeholder:text-base-content/30 outline-none border-b-2 border-base-300"
-        />
-      )}
+      {/* Panel — overflow-hidden so content can never escape; explicit height so flex body works */}
+      <div
+        className="relative flex flex-col w-full lg:max-w-2xl bg-base-100 border-4 border-primary overflow-hidden"
+        style={{ maxHeight: `calc(100dvh - ${keyboardHeight}px - 2rem)` }}
+      >
 
-      {/* Link URL */}
-      {postType === 'Link' && (
-        <input
-          type="url"
-          placeholder="https://…"
-          value={href}
-          onChange={(e) => setHref(e.target.value)}
-          onBlur={handleHrefBlur}
-          className={`w-full px-4 py-2.5 bg-base-100 font-ui text-sm tracking-wide text-base-content placeholder:text-base-content/30 outline-none border-b-2 border-base-300 ${fetchingMeta ? 'opacity-50' : ''}`}
-        />
-      )}
+        {/* Top bar */}
+        <div className="flex items-center justify-between border-b-2 border-base-300 bg-base-200 shrink-0">
+          <PostTypeSelector value={postType} onChange={handleTypeChange} />
+          <button
+            onClick={handleCancel}
+            className="px-4 py-2 font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-base-content transition-colors"
+          >
+            ✕
+          </button>
+        </div>
 
-      {/* Event datetimes + location */}
-      {postType === 'Event' && (
-        <>
-          <div className="flex border-b-2 border-base-300">
-            <input
-              type="datetime-local"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content outline-none border-r-2 border-base-300"
-            />
-            <input
-              type="datetime-local"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content/60 outline-none"
-            />
-          </div>
-          <div className="flex items-center border-b-2 border-base-300 bg-base-100">
+        {/* Scrollable body — min-h-0 is required for flex children to shrink correctly */}
+        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+
+          {/* Title — Article, Event, Link, Media */}
+          {hasTitle && (
             <input
               type="text"
-              placeholder="Location (optional)…"
-              value={location}
-              onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
-              className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none"
+              placeholder="Title…"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-4 py-3 bg-base-100 font-display text-2xl tracking-wide text-base-content placeholder:text-base-content/30 outline-none border-b-2 border-base-300"
             />
-            <button
-              type="button"
-              onClick={handleGeolocate}
-              disabled={locating}
-              title="Use my location"
-              className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${
-                geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'
-              }`}
-            >
-              {locating ? '…' : 'GPS'}
+          )}
+
+          {/* Link URL */}
+          {postType === 'Link' && (
+            <input
+              type="url"
+              placeholder="https://…"
+              value={href}
+              onChange={(e) => setHref(e.target.value)}
+              onBlur={handleHrefBlur}
+              className={`w-full px-4 py-2.5 bg-base-100 font-ui text-sm tracking-wide text-base-content placeholder:text-base-content/30 outline-none border-b-2 border-base-300 ${fetchingMeta ? 'opacity-50' : ''}`}
+            />
+          )}
+
+          {/* Event datetimes + location */}
+          {postType === 'Event' && (
+            <>
+              <div className="flex border-b-2 border-base-300">
+                <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+                  className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content outline-none border-r-2 border-base-300" />
+                <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+                  className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content/60 outline-none" />
+              </div>
+              <div className="flex items-center border-b-2 border-base-300 bg-base-100">
+                <input type="text" placeholder="Location (optional)…" value={location}
+                  onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
+                  className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none" />
+                <button type="button" onClick={handleGeolocate} disabled={locating}
+                  className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'}`}>
+                  {locating ? '…' : 'GPS'}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Rich text editor — no extra wrapper, editor fills the space */}
+          <RichTextEditor
+            key={editorKey}
+            content={content}
+            onChange={setContent}
+            maxWords={postType === 'Note' ? NOTE_MAX_WORDS : undefined}
+            autoFocus
+            editorClassName="min-h-[40vh]"
+          />
+
+          {/* Media attachments */}
+          {postType === 'Media' && (
+            <div className="border-t-2 border-base-300">
+              {attachments.map((att, i) => (
+                <AttachmentRow key={i} att={att} index={i} onUpdate={updateAttachment} onRemove={removeAttachment}
+                  isFeatured={i === featuredIdx} onSetFeatured={setFeaturedIdx} />
+              ))}
+              <button type="button" onClick={() => fileInputRef.current?.click()}
+                className="w-full px-4 py-2.5 font-ui text-xs uppercase tracking-widest text-base-content/40 hover:text-base-content hover:bg-base-200 transition-colors text-left">
+                + Add file…
+              </button>
+              <input ref={fileInputRef} type="file" multiple accept="image/*,audio/*,video/*" className="hidden" onChange={handleFileAdd} />
+            </div>
+          )}
+
+          {/* Tags */}
+          {hasTags && <TagsInput tags={tags} onChange={setTags} />}
+
+          {/* Location — all types except Event */}
+          {postType !== 'Event' && (
+            <div className="flex items-center border-t-2 border-base-300 bg-base-100">
+              <input type="text" placeholder="Location (optional)…" value={location}
+                onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
+                className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none" />
+              <button type="button" onClick={handleGeolocate} disabled={locating}
+                className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'}`}>
+                {locating ? '…' : 'GPS'}
+              </button>
+            </div>
+          )}
+
+        </div>
+
+        {/* Footer — pinned to bottom, never scrolls away */}
+        <div className="flex items-center justify-between gap-3 px-3 py-2 bg-base-200 border-t-2 border-base-300 shrink-0">
+          <CircleSelector circles={circles} value={audience} onChange={setAudience} showAudience allowCreate direction="up" />
+          <div className="flex items-center gap-3">
+            {error && <span className="font-ui text-xs uppercase tracking-widest text-error">{error}</span>}
+            {postType === 'Note' && (
+              <span className={`font-ui text-xs uppercase tracking-widest tabular-nums ${atNoteLimit ? 'text-error' : noteWarn ? 'text-warning' : 'text-base-content/30'}`}>
+                {wordCount}/{NOTE_MAX_WORDS}
+              </span>
+            )}
+            <button type="button" onClick={handleCancel}
+              className="px-3 py-1.5 font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-base-content transition-colors">
+              Cancel
+            </button>
+            <button type="button" onClick={handleSubmit} disabled={!canPost}
+              className="px-4 py-1.5 font-ui text-xs uppercase tracking-widest bg-primary text-primary-content hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity">
+              {submitting ? 'Posting…' : 'Post'}
             </button>
           </div>
-        </>
-      )}
-
-      {/* Rich text editor */}
-      <div className="border-b-2 border-base-300">
-        <RichTextEditor
-          key={editorKey}
-          content={content}
-          onChange={setContent}
-          maxWords={postType === 'Note' ? NOTE_MAX_WORDS : undefined}
-        />
-      </div>
-
-      {/* Media attachments */}
-      {postType === 'Media' && (
-        <div className="border-b-2 border-base-300">
-          {attachments.map((att, i) => (
-            <AttachmentRow
-              key={i}
-              att={att}
-              index={i}
-              onUpdate={updateAttachment}
-              onRemove={removeAttachment}
-              isFeatured={i === featuredIdx}
-              onSetFeatured={setFeaturedIdx}
-            />
-          ))}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full px-4 py-2.5 font-ui text-xs uppercase tracking-widest text-base-content/40 hover:text-base-content hover:bg-base-200 transition-colors text-left"
-          >
-            + Add file…
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*,audio/*,video/*"
-            className="hidden"
-            onChange={handleFileAdd}
-          />
         </div>
-      )}
 
-      {/* Tags — Article, Link, Event, Media */}
-      {hasTags && <TagsInput tags={tags} onChange={setTags} />}
-
-      {/* Location — all types except Event (rendered above datetimes for Event) */}
-      {postType !== 'Event' && <div className="flex items-center border-b-2 border-base-300 bg-base-100">
-        <input
-          type="text"
-          placeholder="Location (optional)…"
-          value={location}
-          onChange={(e) => {
-            setLocation(e.target.value)
-            if (!e.target.value) setGeo(null)
-          }}
-          className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none"
-        />
-        <button
-          type="button"
-          onClick={handleGeolocate}
-          disabled={locating}
-          title="Use my location"
-          className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${
-            geo
-              ? 'text-primary'
-              : locating
-                ? 'text-base-content/20 cursor-wait'
-                : 'text-base-content/30 hover:text-base-content'
-          }`}
-        >
-          {locating ? '…' : geo ? 'GPS' : 'GPS'}
-        </button>
-      </div>}
-
-      {/* Footer: audience + actions */}
-      <div className="flex items-center justify-between gap-3 px-3 py-2 bg-base-200">
-
-        {/* Audience */}
-        <CircleSelector
-          circles={circles}
-          value={audience}
-          onChange={setAudience}
-          showAudience
-          allowCreate
-          direction="up"
-        />
-
-        {/* Error + word count + actions */}
-        <div className="flex items-center gap-3">
-          {error && (
-            <span className="font-ui text-xs uppercase tracking-widest text-error">{error}</span>
-          )}
-          {postType === 'Note' && (
-            <span className={`font-ui text-xs uppercase tracking-widest tabular-nums ${
-              atNoteLimit ? 'text-error' : noteWarn ? 'text-warning' : 'text-base-content/30'
-            }`}>
-              {wordCount}/{NOTE_MAX_WORDS}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="px-3 py-1.5 font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-base-content transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!canPost}
-            className="px-4 py-1.5 font-ui text-xs uppercase tracking-widest bg-primary text-primary-content hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
-          >
-            {submitting ? 'Posting…' : 'Post'}
-          </button>
-        </div>
       </div>
-
-    </div>
+    </div>,
+    document.body
   )
 }

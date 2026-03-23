@@ -100,7 +100,7 @@ export default function PostBody({ post }) {
             </h1>
       )}
       <div
-        className="prose prose-sm max-w-none text-[13.5px] [&_p]:leading-[1.45] [&_p]:text-left [&_p]:font-[450] [&_h2]:text-lg lg:[&_h2]:text-xl [&_h3]:text-base lg:[&_h3]:text-lg"
+        className="prose prose-sm max-w-none text-[13.5px] [&_p]:leading-[1.45] [&_p]:font-[450] [&_h2]:text-lg lg:[&_h2]:text-xl [&_h3]:text-base lg:[&_h3]:text-lg"
         dangerouslySetInnerHTML={{ __html: html }}
       />
 

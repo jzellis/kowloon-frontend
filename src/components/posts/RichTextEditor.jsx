@@ -28,7 +28,7 @@ function ToolbarButton({ onClick, active, children }) {
   )
 }
 
-export default function RichTextEditor({ content = '', onChange, maxWords }) {
+export default function RichTextEditor({ content = '', onChange, maxWords, autoFocus = false, editorClassName = '' }) {
   const lastValidDoc = useRef(null)
 
   const editor = useEditor({
@@ -39,6 +39,7 @@ export default function RichTextEditor({ content = '', onChange, maxWords }) {
       Markdown,
     ],
     content,
+    autofocus: autoFocus ? 'end' : false,
     onUpdate({ editor }) {
       const md = editor.storage.markdown.getMarkdown()
 
@@ -92,7 +93,7 @@ export default function RichTextEditor({ content = '', onChange, maxWords }) {
       {/* Editor area */}
       <EditorContent
         editor={editor}
-        className="font-reading text-base-content p-4 min-h-32 prose max-w-none focus:outline-none bg-base-100"
+        className={`font-reading text-base-content p-4 prose max-w-none focus:outline-none bg-base-100 ${editorClassName || 'min-h-32'}`}
       />
     </div>
   )

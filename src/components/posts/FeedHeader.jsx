@@ -93,7 +93,7 @@ function TypeFilter({ activeTypes, defaultTypes }) {
           className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors border-r border-base-300 ${
             activeTypes.length === 0
               ? 'bg-primary text-primary-content'
-              : 'bg-base-200 text-base-content/60 hover:bg-base-300'
+              : 'bg-base-200 text-base-content/60 dark:text-base-content/85 hover:bg-base-300'
           }`}
         >
           All
@@ -109,7 +109,7 @@ function TypeFilter({ activeTypes, defaultTypes }) {
               className={`flex items-center gap-1.5 px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors border-r border-base-300 last:border-r-0 ${
                 active
                   ? 'bg-primary text-primary-content'
-                  : 'bg-base-200 text-base-content/60 hover:bg-base-300'
+                  : 'bg-base-200 text-base-content/60 dark:text-base-content/85 hover:bg-base-300'
               }`}
             >
               <PostTypeIcon type={type} size="sm" />
@@ -159,7 +159,7 @@ export default function FeedHeader({ circles = [], currentCircle }) {
           variant="title"
         />
         {currentCircleObj?.summary && (
-          <span className="font-ui text-xs text-base-content/50 uppercase tracking-widest">
+          <span className="font-ui text-xs text-base-content/50 dark:text-base-content/80 uppercase tracking-widest">
             {currentCircleObj.summary}
           </span>
         )}
