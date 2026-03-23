@@ -23,7 +23,7 @@ export default function PostTypeSelector({ value, onChange }) {
             style={active ? { borderBottom: `3px solid ${config.color}` } : {}}
           >
             <PostTypeIcon type={type} size="sm" />
-            <span className="hidden sm:inline">{config.label}</span>
+            {active && <span>{config.label}</span>}
           </button>
         )
       })}

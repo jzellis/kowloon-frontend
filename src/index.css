@@ -151,6 +151,12 @@
     outline: none;
   }
 
+  /* Make the ProseMirror element fill the full height of its container so
+     tapping anywhere in the editor box focuses it, not just the text area */
+  .ProseMirror {
+    min-height: inherit;
+  }
+
   /* Prose — markdown rendered content in post cards */
   .prose p {
     margin-bottom: 1.125em;

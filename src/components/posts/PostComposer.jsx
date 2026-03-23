@@ -13,6 +13,15 @@ import PostTypeSelector from './PostTypeSelector'
 import RichTextEditor from './RichTextEditor'
 import CircleSelector from '../circles/CircleSelector'
 import AudioPlayer from '../ui/AudioPlayer'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPhotoFilm, faGripVertical } from '@fortawesome/free-solid-svg-icons'
+import {
+  DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext, verticalListSortingStrategy, useSortable, arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const NOTE_MAX_WORDS = 500
 const NOTE_MAX_CHARS = 5000
@@ -62,6 +71,49 @@ function TagsInput({ tags, onChange }) {
   )
 }
 
+// ── DateTimeField ──────────────────────────────────────────────────────────
+
+function DateTimeField({ value, onChange, placeholder, optional = false, borderRight = false }) {
+  const [active, setActive] = useState(false)
+  const inputRef = useRef(null)
+
+  const handleActivate = () => {
+    setActive(true)
+    setTimeout(() => inputRef.current?.showPicker?.(), 0)
+  }
+
+  const handleBlur = () => {
+    if (!value) setActive(false)
+  }
+
+  const borderClass = borderRight ? 'border-r-2 border-base-300' : ''
+
+  if (!value && !active) {
+    return (
+      <button
+        type="button"
+        onClick={handleActivate}
+        className={`flex-1 flex items-center justify-between px-4 py-2.5 bg-base-100 font-ui text-sm uppercase tracking-widest text-base-content/40 hover:text-base-content/70 transition-colors text-left ${borderClass}`}
+      >
+        <span>{placeholder}</span>
+        {optional && <span className="text-base-content/30 normal-case tracking-normal text-xs italic font-reading">optional</span>}
+      </button>
+    )
+  }
+
+  return (
+    <input
+      ref={inputRef}
+      type="datetime-local"
+      value={value}
+      onChange={onChange}
+      onBlur={handleBlur}
+      autoFocus={!value}
+      className={`flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content outline-none ${borderClass}`}
+    />
+  )
+}
+
 // ── Attachment row (Media type) ────────────────────────────────────────────
 
 function AttachmentPreview({ att }) {
@@ -91,10 +143,34 @@ function AttachmentPreview({ att }) {
   return null
 }
 
-function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatured }) {
+function SortableAttachmentRow(props) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.att.previewUrl })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  }
+  return (
+    <div ref={setNodeRef} style={style}>
+      <AttachmentRow {...props} dragHandleProps={{ ...attributes, ...listeners }} />
+    </div>
+  )
+}
+
+function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatured, dragHandleProps = {} }) {
   const isAudio = att.file.type.startsWith('audio/')
   return (
-    <div className={`flex gap-3 items-start px-4 py-2.5 border-b border-base-300 bg-base-100 ${isAudio ? 'flex-col' : ''}`}>
+    <div className={`flex gap-3 items-start py-2.5 border-b border-base-300 bg-base-100 ${isAudio ? 'flex-col' : ''}`}>
+      {/* Drag handle */}
+      <button
+        type="button"
+        className="shrink-0 self-center px-2 py-1 text-base-content/25 hover:text-base-content/60 cursor-grab active:cursor-grabbing touch-none"
+        aria-label="Drag to reorder"
+        {...dragHandleProps}
+      >
+        <FontAwesomeIcon icon={faGripVertical} />
+      </button>
       {!isAudio && <AttachmentPreview att={att} />}
       <div className="flex flex-col gap-1 flex-1 min-w-0">
         {isAudio && <AttachmentPreview att={att} />}
@@ -163,6 +239,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
 
   const composerRef = useRef(null)
   const fileInputRef = useRef(null)
+  const hrefInputRef = useRef(null)
 
   const wordCount = postType === 'Note' ? countWords(content) : 0
   const charCount = postType === 'Note' ? content.length : 0
@@ -183,6 +260,9 @@ export default function PostComposer({ circles = [], onPostCreated }) {
       }
     }
     setPostType(newType)
+    if (newType === 'Link') {
+      setTimeout(() => hrefInputRef.current?.focus(), 0)
+    }
   }
 
   // Collapse on outside click (collapsed state only)
@@ -302,6 +382,25 @@ export default function PostComposer({ circles = [], onPostCreated }) {
   const updateAttachment = (i, field, value) =>
     setAttachments((prev) => prev.map((a, idx) => idx === i ? { ...a, [field]: value } : a))
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+  )
+
+  const handleAttachmentDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return
+    setAttachments((prev) => {
+      const oldIndex = prev.findIndex((a) => a.previewUrl === active.id)
+      const newIndex = prev.findIndex((a) => a.previewUrl === over.id)
+      return arrayMove(prev, oldIndex, newIndex)
+    })
+    setFeaturedIdx((prev) => {
+      const oldIndex = attachments.findIndex((a) => a.previewUrl === active.id)
+      const newIndex = attachments.findIndex((a) => a.previewUrl === over.id)
+      return arrayMove(attachments, oldIndex, newIndex).indexOf(attachments[prev])
+    })
+  }
+
   const removeAttachment = (i) => {
     setAttachments((prev) => {
       URL.revokeObjectURL(prev[i].previewUrl)
@@ -360,15 +459,18 @@ export default function PostComposer({ circles = [], onPostCreated }) {
 
   // ── Modal ─────────────────────────────────────────────────────────────────
   return createPortal(
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-end lg:justify-center p-4 lg:p-8">
+    <div
+      className="fixed inset-x-0 top-0 z-50 flex flex-col items-center justify-end lg:justify-center p-4 lg:p-8"
+      style={{ bottom: `${keyboardHeight}px` }}
+    >
 
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60" onClick={handleCancel} />
 
-      {/* Panel — overflow-hidden so content can never escape; explicit height so flex body works */}
+      {/* Panel — overflow-hidden so content can never escape; flex body fills available space */}
       <div
         className="relative flex flex-col w-full lg:max-w-2xl bg-base-100 border-4 border-primary overflow-hidden"
-        style={{ maxHeight: `calc(100dvh - ${keyboardHeight}px - 2rem)` }}
+        style={{ maxHeight: 'calc(100% - 2rem)' }}
       >
 
         {/* Top bar */}
@@ -385,6 +487,70 @@ export default function PostComposer({ circles = [], onPostCreated }) {
         {/* Scrollable body — min-h-0 is required for flex children to shrink correctly */}
         <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
 
+          {/* Media file picker — shown first so adding a photo/clip is the first action */}
+          {postType === 'Media' && (
+            <div className="border-b-2 border-base-300">
+              {attachments.length === 0 ? (
+                <div className="flex items-center justify-center py-8 bg-base-200">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-3 px-6 py-3 bg-primary text-primary-content font-ui text-sm uppercase tracking-widest hover:opacity-90 transition-opacity"
+                  >
+                    <FontAwesomeIcon icon={faPhotoFilm} className="text-lg" />
+                    Add photos, video, or audio
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAttachmentDragEnd}>
+                    <SortableContext items={attachments.map((a) => a.previewUrl)} strategy={verticalListSortingStrategy}>
+                      {attachments.map((att, i) => (
+                        <SortableAttachmentRow key={att.previewUrl} att={att} index={i}
+                          onUpdate={updateAttachment} onRemove={removeAttachment}
+                          isFeatured={i === featuredIdx} onSetFeatured={setFeaturedIdx} />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                  <button type="button" onClick={() => fileInputRef.current?.click()}
+                    className="w-full px-4 py-2.5 font-ui text-xs uppercase tracking-widest text-base-content/40 hover:text-base-content hover:bg-base-200 transition-colors text-center border-t border-base-300">
+                    + Add more…
+                  </button>
+                </>
+              )}
+              <input ref={fileInputRef} type="file" multiple accept="image/*,audio/*,video/*" className="hidden" onChange={handleFileAdd} />
+            </div>
+          )}
+
+          {/* Link URL — first field for Link type, same size as title */}
+          {postType === 'Link' && (
+            <div className={`flex items-center border-b-2 border-base-300 bg-base-100 ${fetchingMeta ? 'opacity-50' : ''}`}>
+              <input
+                ref={hrefInputRef}
+                type="url"
+                placeholder="https://…"
+                value={href}
+                onChange={(e) => setHref(e.target.value)}
+                onBlur={handleHrefBlur}
+                className="flex-1 px-4 py-3 bg-transparent font-display text-2xl tracking-wide text-base-content placeholder:text-base-content/30 outline-none min-w-0"
+              />
+              {!href && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const text = await navigator.clipboard.readText()
+                      if (text) { setHref(text); setTimeout(() => hrefInputRef.current?.blur(), 0) }
+                    } catch {}
+                  }}
+                  className="shrink-0 px-3 py-1.5 mx-2 font-ui text-xs uppercase tracking-widest bg-base-200 hover:bg-base-300 text-base-content/60 hover:text-base-content transition-colors"
+                >
+                  Paste
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Title — Article, Event, Link, Media */}
           {hasTitle && (
             <input
@@ -396,31 +562,28 @@ export default function PostComposer({ circles = [], onPostCreated }) {
             />
           )}
 
-          {/* Link URL */}
-          {postType === 'Link' && (
-            <input
-              type="url"
-              placeholder="https://…"
-              value={href}
-              onChange={(e) => setHref(e.target.value)}
-              onBlur={handleHrefBlur}
-              className={`w-full px-4 py-2.5 bg-base-100 font-ui text-sm tracking-wide text-base-content placeholder:text-base-content/30 outline-none border-b-2 border-base-300 ${fetchingMeta ? 'opacity-50' : ''}`}
-            />
-          )}
-
           {/* Event datetimes + location */}
           {postType === 'Event' && (
             <>
               <div className="flex border-b-2 border-base-300">
-                <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content outline-none border-r-2 border-base-300" />
-                <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content/60 outline-none" />
+                <DateTimeField
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  placeholder="Start Date"
+                  borderRight
+                />
+                <DateTimeField
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  placeholder="End Date"
+                  optional
+                />
               </div>
               <div className="flex items-center border-b-2 border-base-300 bg-base-100">
-                <input type="text" placeholder="Location (optional)…" value={location}
+                <input type="text" placeholder="Location…" value={location}
                   onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
                   className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none" />
+                {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0">optional</span>}
                 <button type="button" onClick={handleGeolocate} disabled={locating}
                   className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'}`}>
                   {locating ? '…' : 'GPS'}
@@ -439,30 +602,16 @@ export default function PostComposer({ circles = [], onPostCreated }) {
             editorClassName="min-h-[40vh]"
           />
 
-          {/* Media attachments */}
-          {postType === 'Media' && (
-            <div className="border-t-2 border-base-300">
-              {attachments.map((att, i) => (
-                <AttachmentRow key={i} att={att} index={i} onUpdate={updateAttachment} onRemove={removeAttachment}
-                  isFeatured={i === featuredIdx} onSetFeatured={setFeaturedIdx} />
-              ))}
-              <button type="button" onClick={() => fileInputRef.current?.click()}
-                className="w-full px-4 py-2.5 font-ui text-xs uppercase tracking-widest text-base-content/40 hover:text-base-content hover:bg-base-200 transition-colors text-left">
-                + Add file…
-              </button>
-              <input ref={fileInputRef} type="file" multiple accept="image/*,audio/*,video/*" className="hidden" onChange={handleFileAdd} />
-            </div>
-          )}
-
           {/* Tags */}
           {hasTags && <TagsInput tags={tags} onChange={setTags} />}
 
           {/* Location — all types except Event */}
           {postType !== 'Event' && (
             <div className="flex items-center border-t-2 border-base-300 bg-base-100">
-              <input type="text" placeholder="Location (optional)…" value={location}
+              <input type="text" placeholder="Location…" value={location}
                 onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
                 className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none" />
+              {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0">optional</span>}
               <button type="button" onClick={handleGeolocate} disabled={locating}
                 className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'}`}>
                 {locating ? '…' : 'GPS'}
