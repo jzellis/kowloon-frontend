@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -56,6 +57,9 @@ export function Header() {
     { to: '/search',   label: t('nav.search')  },
   ]
 
+  const [menuOpen, setMenuOpen]     = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+
   const handleLogout = async () => {
     await dispatch(logoutAsync())
     navigate('/login')
@@ -99,6 +103,7 @@ export function Header() {
           {user && (
             <Link
               to="/notifications"
+              aria-label={t('a11y.notifications')}
               className="flex items-center justify-center w-10 h-10 text-base-300/70 hover:text-primary transition-colors"
             >
               <div className="indicator">
@@ -113,6 +118,11 @@ export function Header() {
             <div className="dropdown dropdown-end">
               <button
                 tabIndex={0}
+                aria-label={t('a11y.userMenu')}
+                aria-expanded={userMenuOpen}
+                aria-haspopup="menu"
+                onClick={() => setUserMenuOpen((o) => !o)}
+                onBlur={() => setTimeout(() => setUserMenuOpen(false), 150)}
                 className="flex items-center gap-3 px-3 h-10 text-base-300/70 hover:text-primary hover:bg-black/20 transition-colors"
               >
                 {avatarUrl ? (
@@ -127,6 +137,7 @@ export function Header() {
                 </span>
               </button>
               <ul
+                role="menu"
                 tabIndex={0}
                 className="dropdown-content p-0 mt-0 bg-base-100 dark:bg-neutral w-48 border-t-4 border-primary z-[1]"
               >
@@ -170,11 +181,17 @@ export function Header() {
           <div className="dropdown dropdown-end lg:hidden">
             <button
               tabIndex={0}
+              aria-label={menuOpen ? t('a11y.closeMenu') : t('a11y.openMenu')}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+              onClick={() => setMenuOpen((o) => !o)}
+              onBlur={() => setTimeout(() => setMenuOpen(false), 150)}
               className="flex items-center justify-center w-10 h-10 text-base-300/70 hover:text-primary transition-colors"
             >
               <MenuIcon />
             </button>
             <ul
+              role="menu"
               tabIndex={0}
               className="dropdown-content p-0 mt-0 bg-base-100 dark:bg-neutral w-72 border-t-4 border-primary z-[1]"
             >

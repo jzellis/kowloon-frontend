@@ -5,6 +5,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import FocusTrap from 'focus-trap-react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -245,6 +246,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
   const composerRef = useRef(null)
   const fileInputRef = useRef(null)
   const hrefInputRef = useRef(null)
+  const triggerRef  = useRef(null)
 
   const wordCount = postType === 'Note' ? countWords(content) : 0
   const charCount = postType === 'Note' ? content.length : 0
@@ -307,6 +309,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
 
   const handleCancel = () => {
     setExpanded(false)
+    setTimeout(() => triggerRef.current?.focus(), 0)
     setContent('')
     setTitle('')
     setHref('')
@@ -449,21 +452,24 @@ export default function PostComposer({ circles = [], onPostCreated }) {
   // ── Collapsed ─────────────────────────────────────────────────────────────
   if (!expanded) {
     return (
-      <div
-        ref={composerRef}
+      <button
+        ref={triggerRef}
+        type="button"
         onClick={() => setExpanded(true)}
-        className="flex items-center gap-3 px-4 py-3 bg-base-100 border-2 border-base-300 hover:border-primary cursor-text transition-colors mb-8 group"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-base-100 border-2 border-base-300 hover:border-primary focus-visible:outline-none focus-visible:border-primary cursor-text transition-colors mb-8 group text-left"
+        aria-label={t('composer.prompt')}
       >
         <UserAvatar user={mockUser} size="sm" />
-        <span className="font-reading text-base-content/40 dark:text-base-content/65 group-hover:text-base-content/70 dark:group-hover:text-base-content/85 transition-colors select-none">
+        <span className="font-reading text-base-content/40 dark:text-base-content/65 group-hover:text-base-content/70 dark:group-hover:text-base-content/85 transition-colors select-none" aria-hidden="true">
           {t('composer.prompt')}
         </span>
-      </div>
+      </button>
     )
   }
 
   // ── Modal ─────────────────────────────────────────────────────────────────
   return createPortal(
+    <FocusTrap focusTrapOptions={{ escapeDeactivates: false }}>
     <div
       className="fixed inset-x-0 top-0 z-50 flex flex-col items-center justify-end lg:justify-center p-4 lg:p-8"
       style={{ bottom: `${keyboardHeight}px` }}
@@ -649,7 +655,8 @@ export default function PostComposer({ circles = [], onPostCreated }) {
         </div>
 
       </div>
-    </div>,
+    </div>
+    </FocusTrap>,
     document.body
   )
 }

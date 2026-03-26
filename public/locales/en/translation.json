@@ -1,4 +1,13 @@
 {
+  "a11y": {
+    "skipToContent": "Skip to content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "notifications": "Notifications",
+    "userMenu": "User menu",
+    "closeSelf": "Close"
+  },
+
   "common": {
     "cancel": "Cancel",
     "save": "Save",
