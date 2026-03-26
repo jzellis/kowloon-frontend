@@ -3,6 +3,7 @@
 
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import PostCard from './PostCard'
 import Spinner from '../ui/Spinner'
 import EmptyState from '../ui/EmptyState'
@@ -94,16 +95,17 @@ function MediaGrid({ posts, page, totalPages, onPageChange }) {
 
 export default function PostList({ posts = [], page, totalPages, onPageChange, loading, error, ignoreTypeFilter = false }) {
   const { activeTypes } = useSelector((state) => state.feed)
+  const { t } = useTranslation()
 
   if (loading) return <Spinner centered />
   if (error)   return <ErrorState message={error} onRetry={() => onPageChange(page)} />
-  if (!posts.length) return <EmptyState message="No posts yet." />
+  if (!posts.length) return <EmptyState message={t('post.empty')} />
 
   const visible = (!ignoreTypeFilter && activeTypes.length > 0)
     ? posts.filter((p) => activeTypes.includes(p.type))
     : posts
 
-  if (!visible.length) return <EmptyState message="No posts of the selected types." />
+  if (!visible.length) return <EmptyState message={t('post.emptyFiltered')} />
 
   const isMediaGrid = !ignoreTypeFilter && activeTypes.length === 1 && activeTypes[0] === 'Media'
 

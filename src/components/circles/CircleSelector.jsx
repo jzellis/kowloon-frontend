@@ -11,6 +11,7 @@
 //   className     — extra classes on the trigger button
 
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, ChevronDown } from 'lucide-react'
 import NewCircleModal from './NewCircleModal'
 import CircleIcon from '../ui/CircleIcon'
@@ -23,11 +24,6 @@ const hexMask = {
   maskPosition: 'center',
 }
 
-const AUDIENCE_OPTIONS = [
-  { id: 'public', label: 'Public', summary: 'Anyone' },
-  { id: 'server', label: 'Server', summary: 'This server only' },
-]
-
 export default function CircleSelector({
   circles = [],
   value = 'public',
@@ -39,10 +35,16 @@ export default function CircleSelector({
   variant = 'default', // 'default' | 'title'
   className = '',
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [creating, setCreating] = useState(false)
   const ref = useRef(null)
+
+  const AUDIENCE_OPTIONS = [
+    { id: 'public', label: t('circle.public'), summary: t('circle.publicSummary') },
+    { id: 'server', label: t('circle.server'), summary: t('circle.serverSummary') },
+  ]
 
   useEffect(() => {
     function handleClick(e) {
@@ -115,7 +117,7 @@ export default function CircleSelector({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search circles…"
+              placeholder={t('circle.searchPlaceholder')}
               className="flex-1 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none"
             />
           </div>
@@ -149,7 +151,7 @@ export default function CircleSelector({
             {/* Circles */}
             {filtered.length === 0 && (
               <li className="px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-content/40">
-                No circles found
+                {t('circle.noResults')}
               </li>
             )}
             {filtered.map((circle) => (
@@ -187,7 +189,7 @@ export default function CircleSelector({
                   onClick={() => { setOpen(false); setCreating(true) }}
                   className="w-full px-4 py-2.5 text-left font-ui text-xs uppercase tracking-widest text-primary hover:bg-base-200 transition-colors"
                 >
-                  + New circle…
+                  {t('circle.new')}
                 </button>
               </li>
             )}

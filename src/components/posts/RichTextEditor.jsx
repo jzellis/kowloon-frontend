@@ -4,6 +4,7 @@
 //        maxWords (number — if set, blocks input beyond this word count)
 
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -12,10 +13,11 @@ import { Markdown } from 'tiptap-markdown'
 
 const countWords = (md) => md.trim().split(/\s+/).filter(Boolean).length
 
-function ToolbarButton({ onClick, active, children }) {
+function ToolbarButton({ onClick, active, title, children }) {
   return (
     <button
       type="button"
+      title={title}
       onMouseDown={(e) => { e.preventDefault(); onClick() }}
       className={`px-3 py-1.5 font-ui text-xs uppercase tracking-widest transition-colors ${
         active
@@ -29,6 +31,7 @@ function ToolbarButton({ onClick, active, children }) {
 }
 
 export default function RichTextEditor({ content = '', onChange, maxWords, autoFocus = false, editorClassName = '' }) {
+  const { t } = useTranslation()
   const lastValidDoc = useRef(null)
 
   const editor = useEditor({
@@ -73,19 +76,19 @@ export default function RichTextEditor({ content = '', onChange, maxWords, autoF
         </ToolbarButton>
         <ToolbarButton
           onClick={() => {
-            const url = window.prompt('URL')
+            const url = window.prompt(t('editor.link'))
             if (url) editor.chain().focus().setLink({ href: url }).run()
           }}
           active={editor.isActive('link')}
         >
-          Link
+          {t('editor.link')}
         </ToolbarButton>
         {editor.isActive('link') && (
           <ToolbarButton onClick={() => editor.chain().focus().unsetLink().run()} active={false}>
-            Unlink
+            {t('editor.unlink')}
           </ToolbarButton>
         )}
-        <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')}>
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')} title={t('editor.blockquote')}>
           &ldquo;&rdquo;
         </ToolbarButton>
       </div>

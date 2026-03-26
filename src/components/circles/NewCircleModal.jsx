@@ -3,6 +3,7 @@
 // Props: onClose fn(), onCreated fn(circle)
 
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Camera } from 'lucide-react'
 
 const hexMask = {
@@ -14,6 +15,7 @@ const hexMask = {
 }
 
 export default function NewCircleModal({ onClose, onCreated }) {
+  const { t } = useTranslation()
   const [name, setName]           = useState('')
   const [summary, setSummary]     = useState('')
   const [members, setMembers]     = useState('')
@@ -90,7 +92,7 @@ export default function NewCircleModal({ onClose, onCreated }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b-2 border-base-300 bg-base-200">
-          <h2 className="font-display text-2xl tracking-wide">New Circle</h2>
+          <h2 className="font-display text-2xl tracking-wide">{t('circle.newTitle')}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -110,7 +112,7 @@ export default function NewCircleModal({ onClose, onCreated }) {
               type="button"
               onClick={() => iconInputRef.current?.click()}
               className="relative shrink-0 group"
-              title="Set circle icon"
+              title={t('circle.iconLabel')}
             >
               <div className="w-14 h-14 bg-secondary flex items-center justify-center" style={hexMask}>
                 {iconPreview
@@ -129,14 +131,14 @@ export default function NewCircleModal({ onClose, onCreated }) {
             {/* Name */}
             <div className="flex flex-col gap-1 flex-1">
               <label className="font-ui text-xs uppercase tracking-widest text-base-content/50">
-                Name <span className="text-error">*</span>
+                {t('circle.nameLabel')} <span className="text-error">*</span>
               </label>
               <input
                 ref={nameRef}
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Music Friends"
+                placeholder={t('circle.namePlaceholder')}
                 className="bg-transparent font-display text-2xl tracking-wide text-base-content placeholder:text-base-content/20 outline-none"
               />
             </div>
@@ -144,30 +146,30 @@ export default function NewCircleModal({ onClose, onCreated }) {
 
           <div className="flex flex-col gap-1 px-6 py-4 border-b-2 border-base-300">
             <label className="font-ui text-xs uppercase tracking-widest text-base-content/50">
-              Description
+              {t('circle.descriptionLabel')}
             </label>
             <input
               type="text"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              placeholder="What's this circle for?"
+              placeholder={t('circle.descriptionPlaceholder')}
               className="bg-transparent font-reading text-base-content placeholder:text-base-content/30 outline-none"
             />
           </div>
 
           <div className="flex flex-col gap-1 px-6 py-4 border-b-2 border-base-300">
             <label className="font-ui text-xs uppercase tracking-widest text-base-content/50">
-              Members
+              {t('circle.membersLabel')}
             </label>
             <textarea
               value={members}
               onChange={(e) => setMembers(e.target.value)}
-              placeholder="@user@server.org, @friend@kwln.org, …"
+              placeholder={t('circle.membersPlaceholder')}
               rows={3}
               className="bg-transparent font-reading text-sm text-base-content placeholder:text-base-content/30 outline-none resize-none"
             />
             <p className="font-ui text-xs text-base-content/30 uppercase tracking-widest">
-              Comma-separated user, group, or server IDs
+              {t('circle.membersHint')}
             </p>
           </div>
 
@@ -183,14 +185,14 @@ export default function NewCircleModal({ onClose, onCreated }) {
                 onClick={onClose}
                 className="px-3 py-1.5 font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-base-content transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={submitting || !name.trim()}
                 className="px-4 py-1.5 font-ui text-xs uppercase tracking-widest bg-primary text-primary-content hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
               >
-                {submitting ? 'Creating…' : 'Create Circle'}
+                {submitting ? t('circle.creating') : t('circle.create')}
               </button>
             </div>
           </div>

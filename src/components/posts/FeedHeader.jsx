@@ -12,6 +12,7 @@
 
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { PinOff } from 'lucide-react'
 import CircleSelector from '../circles/CircleSelector'
 import {
@@ -22,12 +23,12 @@ import {
 import PostTypeIcon from '../ui/PostTypeIcon'
 
 const POST_TYPES = ['Note', 'Article', 'Media', 'Event', 'Link']
-const POST_TYPE_LABELS = { Note: 'Notes', Article: 'Articles', Media: 'Media', Event: 'Events', Link: 'Links' }
 
 // ── Circle Switcher ────────────────────────────────────────────────────────
 
 function CircleSwitcher({ circles = [], currentCircle, pinnedCircleIds }) {
   const dispatch = useDispatch()
+  const { t } = useTranslation()
 
   const pinned = circles.filter((c) => pinnedCircleIds.includes(c.id))
 
@@ -63,7 +64,7 @@ function CircleSwitcher({ circles = [], currentCircle, pinnedCircleIds }) {
           </button>
           <button
             onClick={(e) => handlePin(e, circle.id)}
-            title="Unpin"
+            title={t('feed.unpin')}
             className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity text-base-content/40 hover:text-error"
           >
             <PinOff className="w-2.5 h-2.5" />
@@ -79,6 +80,7 @@ function CircleSwitcher({ circles = [], currentCircle, pinnedCircleIds }) {
 
 function TypeFilter({ activeTypes, defaultTypes }) {
   const dispatch = useDispatch()
+  const { t } = useTranslation()
 
   const isDirty =
     activeTypes.length !== defaultTypes.length ||
@@ -96,7 +98,7 @@ function TypeFilter({ activeTypes, defaultTypes }) {
               : 'bg-base-200 text-base-content/60 dark:text-base-content/85 hover:bg-base-300'
           }`}
         >
-          All
+          {t('feed.all')}
         </button>
 
         {POST_TYPES.map((type) => {
@@ -113,7 +115,7 @@ function TypeFilter({ activeTypes, defaultTypes }) {
               }`}
             >
               <PostTypeIcon type={type} size="sm" />
-              <span className="hidden sm:inline">{POST_TYPE_LABELS[type]}</span>
+              <span className="hidden sm:inline">{t({ Note: 'feed.notes', Article: 'feed.articles', Media: 'feed.media', Event: 'feed.events', Link: 'feed.links' }[type] ?? type)}</span>
             </button>
           )
         })}
@@ -126,13 +128,13 @@ function TypeFilter({ activeTypes, defaultTypes }) {
             onClick={() => dispatch(saveDefaultTypesAsync(activeTypes))}
             className="font-ui text-xs uppercase tracking-widest text-primary hover:underline transition-colors"
           >
-            Save as default
+            {t('feed.saveDefault')}
           </button>
           <button
             onClick={() => dispatch(resetToDefaults())}
             className="font-ui text-xs uppercase tracking-widest text-base-content/40 hover:text-base-content transition-colors"
           >
-            Reset
+            {t('feed.reset')}
           </button>
         </div>
       )}

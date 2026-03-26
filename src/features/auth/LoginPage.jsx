@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { loginAsync, clearError } from './authSlice'
 
 // If VITE_SERVER_URL is set at build time, this frontend is locked to that instance.
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { user, sessionChecked, status, error } = useSelector((state) => state.auth)
 
+  const { t } = useTranslation()
   const [serverUrl, setServerUrl] = useState(FIXED_SERVER || '')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -49,7 +51,7 @@ export default function LoginPage() {
         <div className="card-body gap-4">
           <h1 className="text-3xl font-bold text-center">Kowloon</h1>
           <p className="text-center text-base-content/60 text-sm">
-            Sign in to your account
+            {t('auth.loginTitle')}
           </p>
 
           {error && (
@@ -62,12 +64,12 @@ export default function LoginPage() {
             {!FIXED_SERVER && (
               <label className="form-control">
                 <div className="label">
-                  <span className="label-text">Server URL</span>
+                  <span className="label-text">{t('auth.serverUrl')}</span>
                 </div>
                 <input
                   type="url"
                   className="input input-bordered"
-                  placeholder="https://kwln.org"
+                  placeholder={t('auth.serverUrlPlaceholder')}
                   value={serverUrl}
                   onChange={(e) => setServerUrl(e.target.value)}
                   required
@@ -78,12 +80,12 @@ export default function LoginPage() {
 
             <label className="form-control">
               <div className="label">
-                <span className="label-text">Username</span>
+                <span className="label-text">{t('auth.username')}</span>
               </div>
               <input
                 type="text"
                 className="input input-bordered"
-                placeholder="username"
+                placeholder={t('auth.usernamePlaceholder')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -94,12 +96,12 @@ export default function LoginPage() {
 
             <label className="form-control">
               <div className="label">
-                <span className="label-text">Password</span>
+                <span className="label-text">{t('auth.password')}</span>
               </div>
               <input
                 type="password"
                 className="input input-bordered"
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -112,16 +114,16 @@ export default function LoginPage() {
               className="btn btn-primary w-full mt-2"
               disabled={isLoading}
             >
-              {isLoading ? <span className="loading loading-spinner" /> : 'Log in'}
+              {isLoading ? <span className="loading loading-spinner" /> : t('auth.login')}
             </button>
           </form>
 
           <div className="divider" />
 
           <p className="text-center text-sm">
-            Don&apos;t have an account?{' '}
+            {t('auth.noAccount')}{' '}
             <Link to="/register" className="link link-primary">
-              Sign up
+              {t('auth.signUp')}
             </Link>
           </p>
         </div>

@@ -4,6 +4,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Copy, Share2, Pencil, Trash2 } from 'lucide-react'
 import UserAvatar from '../components/ui/UserAvatar'
 import CircleIcon from '../components/ui/CircleIcon'
@@ -46,6 +47,7 @@ export default function CirclePage() {
   const { id } = useParams()
   const circle = MOCK_CIRCLE // TODO: fetch by id
   const user = useSelector((state) => state.auth.user)
+  const { t } = useTranslation()
 
   const isOwner = user && circle.attributedTo?.id === user.id
   const isLoggedIn = !!user
@@ -107,18 +109,18 @@ export default function CirclePage() {
               to={`/circles/${encodeURIComponent(circle.id)}/posts`}
               className="self-start flex items-center gap-2 px-4 py-2 bg-base-200 hover:bg-base-300 font-ui text-xs uppercase tracking-widest text-base-content/70 hover:text-base-content transition-colors"
             >
-              Posts From This Circle
+              {t('circle.postsLink')}
             </Link>
           </div>
           {/* Actions */}
           <div className="flex items-center gap-2 shrink-0 pt-1">
             {isLoggedIn && (
               <button className="flex items-center gap-1.5 px-3 py-1.5 border border-base-300 font-ui text-xs uppercase tracking-widest text-base-content/60 hover:border-primary hover:text-primary transition-colors">
-                <Copy size={12} /> Copy
+                <Copy size={12} /> {t('circle.copy')}
               </button>
             )}
             <button className="flex items-center gap-1.5 px-3 py-1.5 border border-base-300 font-ui text-xs uppercase tracking-widest text-base-content/60 hover:border-primary hover:text-primary transition-colors">
-              <Share2 size={12} /> Share
+              <Share2 size={12} /> {t('circle.share')}
             </button>
             {isOwner && (
               <>
@@ -126,10 +128,10 @@ export default function CirclePage() {
                   to={`/circles/${encodeURIComponent(circle.id)}/edit`}
                   className="flex items-center gap-1.5 px-3 py-1.5 border border-base-300 font-ui text-xs uppercase tracking-widest text-base-content/60 hover:border-primary hover:text-primary transition-colors"
                 >
-                  <Pencil size={12} /> Edit
+                  <Pencil size={12} /> {t('common.edit')}
                 </Link>
                 <button className="flex items-center gap-1.5 px-3 py-1.5 border border-error/40 font-ui text-xs uppercase tracking-widest text-error/60 hover:border-error hover:text-error transition-colors">
-                  <Trash2 size={12} /> Delete
+                  <Trash2 size={12} /> {t('common.delete')}
                 </button>
               </>
             )}
@@ -140,7 +142,7 @@ export default function CirclePage() {
 
       {/* Members */}
       <div className="flex flex-col gap-3">
-        <h2 className="font-display text-2xl tracking-wide">Members</h2>
+        <h2 className="font-display text-2xl tracking-wide">{t('circle.members')}</h2>
         <div className="flex flex-col gap-0 border-t border-base-300">
           {circle.members.map((member) => (
             <Link

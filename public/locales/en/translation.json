@@ -1,0 +1,191 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create",
+    "post": "Post",
+    "posting": "Posting…",
+    "loading": "Loading…",
+    "optional": "optional",
+    "back": "Back",
+    "search": "Search",
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "members": "{{count}} member",
+    "members_other": "{{count}} members",
+    "gps": "GPS"
+  },
+
+  "nav": {
+    "feed": "Feed",
+    "circles": "Circles",
+    "groups": "Groups",
+    "search": "Search",
+    "notifications": "Notifications",
+    "profile": "Profile & Settings",
+    "logout": "Log out",
+    "signIn": "Sign in",
+    "register": "Register",
+    "pages": "Pages"
+  },
+
+  "postTypes": {
+    "Note": "Note",
+    "Article": "Article",
+    "Media": "Media",
+    "Event": "Event",
+    "Link": "Link"
+  },
+
+  "composer": {
+    "prompt": "Write something…",
+    "close": "Close composer",
+    "title": "Title…",
+    "linkUrl": "https://…",
+    "linkPaste": "Paste",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "location": "Location…",
+    "addMedia": "Add photos, video, or audio",
+    "addMore": "+ Add more…",
+    "dragToReorder": "Drag to reorder",
+    "attachmentTitle": "Title…",
+    "attachmentAlt": "Alt text / description…",
+    "attachmentRemove": "Remove",
+    "attachmentFeatured": "Featured",
+    "attachmentSetFeatured": "Set featured",
+    "tagsPlaceholder": "Add tags…",
+    "wordCount": "{{count}}/{{max}}",
+    "post": "Post",
+    "posting": "Posting…"
+  },
+
+  "editor": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "link": "Link",
+    "unlink": "Unlink",
+    "blockquote": "Blockquote"
+  },
+
+  "feed": {
+    "all": "All",
+    "notes": "Notes",
+    "articles": "Articles",
+    "media": "Media",
+    "events": "Events",
+    "links": "Links",
+    "saveDefault": "Save as default",
+    "reset": "Reset",
+    "unpin": "Unpin",
+    "everyone": "Everyone you follow"
+  },
+
+  "visibility": {
+    "Public": "Public",
+    "Server": "Server"
+  },
+
+  "circle": {
+    "searchPlaceholder": "Search circles…",
+    "public": "Public",
+    "publicSummary": "Anyone",
+    "server": "Server",
+    "serverSummary": "This server only",
+    "noResults": "No circles found",
+    "new": "+ New circle…",
+    "copy": "Copy",
+    "share": "Share",
+    "postsLink": "Posts From This Circle",
+    "members": "Members",
+    "newTitle": "New Circle",
+    "iconLabel": "Set circle icon",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Music Friends",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "What's this circle for?",
+    "membersLabel": "Members",
+    "membersPlaceholder": "@user@server.org, @friend@kwln.org, …",
+    "membersHint": "Comma-separated user, group, or server IDs",
+    "create": "Create Circle",
+    "creating": "Creating…"
+  },
+
+  "group": {
+    "join": "Join",
+    "leave": "Leave"
+  },
+
+  "post": {
+    "empty": "No posts yet.",
+    "emptyFiltered": "No posts of the selected types.",
+    "reply": "Reply",
+    "replies": "Reply",
+    "replies_other": "Replies",
+    "replyCount": "{{count}} Reply",
+    "replyCount_other": "{{count}} Replies",
+    "react": "React",
+    "bookmark": "Bookmark",
+    "share": "Share",
+    "noReplies": "No replies yet.",
+    "untitledEvent": "Untitled Event"
+  },
+
+  "sidebar": {
+    "popularPosts": "Popular Posts",
+    "popularCircles": "Popular Circles",
+    "activeGroups": "Active Groups",
+    "pages": "Pages"
+  },
+
+  "notification": {
+    "empty": "No notifications.",
+    "markRead": "Mark read",
+    "dismiss": "Dismiss",
+    "mention": "Mentioned you",
+    "react": "Reacted to your post",
+    "follow": "Followed you",
+    "circleInvite": "Invited you to a circle",
+    "groupInvite": "Invited you to a group",
+    "reply": "Replied to your post"
+  },
+
+  "auth": {
+    "loginTitle": "Sign in to your account",
+    "registerTitle": "Create your account",
+    "serverUrl": "Server URL",
+    "serverUrlPlaceholder": "https://kwln.org",
+    "username": "Username",
+    "usernamePlaceholder": "username",
+    "usernamePattern": "Letters, numbers, underscores and hyphens only",
+    "displayName": "Display name",
+    "displayNamePlaceholder": "Your Name",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "confirmPassword": "Confirm password",
+    "inviteCode": "Invite code",
+    "inviteCodeNote": "if required",
+    "inviteCodePlaceholder": "xxxx-xxxx-xxxx",
+    "login": "Log in",
+    "loggingIn": "Logging in…",
+    "createAccount": "Create account",
+    "creatingAccount": "Creating account…",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "haveAccount": "Already have an account?",
+    "logIn": "Log in",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters"
+  },
+
+  "dev": {
+    "loggedOut": "Logged out",
+    "switchOut": "Switch to logged-out view",
+    "switchIn": "Switch to logged-in view"
+  }
+}

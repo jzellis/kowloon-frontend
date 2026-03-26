@@ -1,19 +1,22 @@
 // NotificationItem — single notification with type icon, text, timestamp, and actions.
 // Props: notification object, onMarkRead (fn), onDismiss (fn)
 
+import { useTranslation } from 'react-i18next'
 import Timestamp from '../ui/Timestamp'
 
-const TYPE_LABELS = {
-  mention:      'Mentioned you',
-  react:        'Reacted to your post',
-  follow:       'Followed you',
-  circle_invite: 'Invited you to a circle',
-  group_invite:  'Invited you to a group',
-  reply:        'Replied to your post',
+const NOTIFICATION_TYPE_KEYS = {
+  mention:      'notification.mention',
+  react:        'notification.react',
+  follow:       'notification.follow',
+  circle_invite: 'notification.circleInvite',
+  group_invite:  'notification.groupInvite',
+  reply:        'notification.reply',
 }
 
 export default function NotificationItem({ notification, onMarkRead, onDismiss }) {
-  const label = TYPE_LABELS[notification?.type] ?? notification?.type
+  const { t } = useTranslation()
+  const key = NOTIFICATION_TYPE_KEYS[notification?.type]
+  const label = key ? t(key) : notification?.type
 
   return (
     <div className={`flex items-start gap-4 py-4 border-b border-base-300 ${!notification?.read ? 'border-l-4 border-l-primary pl-3' : ''}`}>
@@ -28,14 +31,14 @@ export default function NotificationItem({ notification, onMarkRead, onDismiss }
             onClick={() => onMarkRead?.(notification.id)}
             className="font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-base-content transition-colors"
           >
-            Mark read
+            {t('notification.markRead')}
           </button>
         )}
         <button
           onClick={() => onDismiss?.(notification.id)}
           className="font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-error transition-colors"
         >
-          Dismiss
+          {t('notification.dismiss')}
         </button>
       </div>
     </div>

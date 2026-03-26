@@ -1,6 +1,7 @@
 // GroupPage — group info, PostComposer (no audience picker), and post feed.
 
 import { useParams, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { MapPin, ExternalLink, Users } from 'lucide-react'
 import PostList from '../components/posts/PostList'
 import PostComposer from '../components/posts/PostComposer'
@@ -73,6 +74,7 @@ const POLICY_LABELS = {
 export default function GroupPage() {
   const { id } = useParams()
   const group = MOCK_GROUP // TODO: fetch by id
+  const { t } = useTranslation()
 
   return (
     <div className="flex flex-col gap-8">
@@ -106,7 +108,7 @@ export default function GroupPage() {
           </div>
           {/* Join button */}
           <button className="shrink-0 px-4 py-2 bg-primary text-primary-content font-ui text-xs uppercase tracking-widest hover:opacity-90 transition-opacity mt-1">
-            Join
+            {t('group.join')}
           </button>
         </div>
 

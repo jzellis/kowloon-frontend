@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { logoutAsync } from '../../features/auth/authSlice'
 import { useClient } from '../../hooks/useClient'
 
@@ -34,13 +35,6 @@ function MenuIcon() {
   )
 }
 
-const NAV_LINKS = [
-  { to: '/',         label: 'Feed'    },
-  { to: '/circles',  label: 'Circles' },
-  { to: '/groups',   label: 'Groups'  },
-  { to: '/search',   label: 'Search'  },
-]
-
 const navLinkClass = ({ isActive }) =>
   `flex items-center h-full px-5 font-ui text-xs uppercase tracking-widest transition-colors ${
     isActive
@@ -53,6 +47,14 @@ export function Header() {
   const navigate  = useNavigate()
   const { user }  = useSelector((state) => state.auth)
   const client    = useClient()
+  const { t }     = useTranslation()
+
+  const NAV_LINKS = [
+    { to: '/',         label: t('nav.feed')    },
+    { to: '/circles',  label: t('nav.circles') },
+    { to: '/groups',   label: t('nav.groups')  },
+    { to: '/search',   label: t('nav.search')  },
+  ]
 
   const handleLogout = async () => {
     await dispatch(logoutAsync())
@@ -133,7 +135,7 @@ export function Header() {
                 </li>
                 <li>
                   <Link to="/profile" className="block px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-content/70 dark:text-white/95 hover:text-primary hover:bg-base-200 dark:hover:bg-black/20 transition-colors">
-                    Profile &amp; Settings
+                    {t('nav.profile')}
                   </Link>
                 </li>
                 <li>
@@ -141,7 +143,7 @@ export function Header() {
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-3 font-ui text-xs uppercase tracking-widest text-base-content/70 dark:text-white/95 hover:text-primary hover:bg-base-200 dark:hover:bg-black/20 transition-colors"
                   >
-                    Log out
+                    {t('nav.logout')}
                   </button>
                 </li>
               </ul>
@@ -153,13 +155,13 @@ export function Header() {
                 to="/login"
                 className="px-4 py-2 font-ui text-xs uppercase tracking-widest text-base-300/70 hover:text-primary transition-colors"
               >
-                Sign in
+                {t('nav.signIn')}
               </Link>
               <Link
                 to="/register"
                 className="px-4 py-2 font-ui text-xs uppercase tracking-widest bg-primary text-secondary hover:bg-base-100 transition-colors"
               >
-                Register
+                {t('nav.register')}
               </Link>
             </div>
           )}
@@ -197,7 +199,7 @@ export function Header() {
 
               {/* Pages */}
               <li className="px-4 pt-1 pb-1 font-ui text-xs uppercase tracking-widest text-base-content/40 dark:text-white/60 border-t border-base-300 dark:border-white/10">
-                Pages
+                {t('nav.pages')}
               </li>
               {SERVER_PAGES.map((page) => (
                 <li key={page.slug}>
@@ -227,7 +229,7 @@ export function Header() {
                       to="/login"
                       className="block px-4 py-3 font-ui text-sm uppercase tracking-widest text-base-content/70 dark:text-white/95 hover:text-primary hover:bg-base-200 dark:hover:bg-black/20 transition-colors"
                     >
-                      Sign in
+                      {t('nav.signIn')}
                     </Link>
                   </li>
                   <li>
@@ -235,7 +237,7 @@ export function Header() {
                       to="/register"
                       className="block px-4 py-3 font-ui text-sm uppercase tracking-widest bg-primary text-primary-content hover:opacity-90 transition-colors"
                     >
-                      Register
+                      {t('nav.register')}
                     </Link>
                   </li>
                 </>

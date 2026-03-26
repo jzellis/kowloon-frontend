@@ -1,6 +1,7 @@
 // PostPage — single post view with full content and replies.
 
 import { useParams, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
 import PostCard from '../components/posts/PostCard'
 import UserAvatar from '../components/ui/UserAvatar'
@@ -79,6 +80,7 @@ function Reply({ reply }) {
 export default function PostPage() {
   const { id } = useParams()
   const post = MOCK_POST // TODO: fetch by id
+  const { t } = useTranslation()
 
   return (
     <div className="flex flex-col gap-8">
@@ -86,14 +88,14 @@ export default function PostPage() {
         to="/"
         className="flex items-center gap-1.5 font-ui text-xs uppercase tracking-widest text-base-content/65 hover:text-primary transition-colors self-start"
       >
-        <ArrowLeft size={13} /> Back
+        <ArrowLeft size={13} /> {t('common.back')}
       </Link>
 
       <PostCard post={post} />
 
       <div className="flex flex-col gap-0">
         <h2 className="font-display text-2xl tracking-wide text-base-content mb-2">
-          {MOCK_REPLIES.length} {MOCK_REPLIES.length === 1 ? 'Reply' : 'Replies'}
+          {t('post.replyCount', { count: MOCK_REPLIES.length })}
         </h2>
         <div className="border-t-2 border-base-300">
           {MOCK_REPLIES.map((reply) => (

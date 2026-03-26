@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { useClient } from '../../hooks/useClient'
 import UserAvatar from '../ui/UserAvatar'
 import PostTypeSelector from './PostTypeSelector'
@@ -31,6 +32,7 @@ const countWords = (md) => md.trim().split(/\s+/).filter(Boolean).length
 // ── Tags input ─────────────────────────────────────────────────────────────
 
 function TagsInput({ tags, onChange }) {
+  const { t } = useTranslation()
   const [input, setInput] = useState('')
 
   const commit = () => {
@@ -64,7 +66,7 @@ function TagsInput({ tags, onChange }) {
           }
         }}
         onBlur={commit}
-        placeholder={tags.length ? '' : 'Add tags…'}
+        placeholder={tags.length ? '' : t('composer.tagsPlaceholder')}
         className="flex-1 min-w-24 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none"
       />
     </div>
@@ -74,6 +76,7 @@ function TagsInput({ tags, onChange }) {
 // ── DateTimeField ──────────────────────────────────────────────────────────
 
 function DateTimeField({ value, onChange, placeholder, optional = false, borderRight = false }) {
+  const { t } = useTranslation()
   const [active, setActive] = useState(false)
   const inputRef = useRef(null)
 
@@ -96,7 +99,7 @@ function DateTimeField({ value, onChange, placeholder, optional = false, borderR
         className={`flex-1 flex items-center justify-between px-4 py-2.5 bg-base-100 font-ui text-sm uppercase tracking-widest text-base-content/40 hover:text-base-content/70 transition-colors text-left ${borderClass}`}
       >
         <span>{placeholder}</span>
-        {optional && <span className="text-base-content/30 normal-case tracking-normal text-xs italic font-reading">optional</span>}
+        {optional && <span className="text-base-content/30 normal-case tracking-normal text-xs italic font-reading">{t('common.optional')}</span>}
       </button>
     )
   }
@@ -159,6 +162,7 @@ function SortableAttachmentRow(props) {
 }
 
 function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatured, dragHandleProps = {} }) {
+  const { t } = useTranslation()
   const isAudio = att.file.type.startsWith('audio/')
   return (
     <div className={`flex gap-3 items-start py-2.5 border-b border-base-300 bg-base-100 ${isAudio ? 'flex-col' : ''}`}>
@@ -166,7 +170,7 @@ function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatur
       <button
         type="button"
         className="shrink-0 self-center px-2 py-1 text-base-content/25 hover:text-base-content/60 cursor-grab active:cursor-grabbing touch-none"
-        aria-label="Drag to reorder"
+        aria-label={t('composer.dragToReorder')}
         {...dragHandleProps}
       >
         <FontAwesomeIcon icon={faGripVertical} />
@@ -178,14 +182,14 @@ function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatur
           type="text"
           value={att.title}
           onChange={(e) => onUpdate(index, 'title', e.target.value)}
-          placeholder="Title…"
+          placeholder={t('composer.attachmentTitle')}
           className="bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none border-b border-base-300 pb-0.5"
         />
         <input
           type="text"
           value={att.alt}
           onChange={(e) => onUpdate(index, 'alt', e.target.value)}
-          placeholder="Alt text / description…"
+          placeholder={t('composer.attachmentAlt')}
           className="bg-transparent font-reading text-xs text-base-content/70 placeholder:text-base-content/30 outline-none"
         />
       </div>
@@ -195,7 +199,7 @@ function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatur
           onClick={() => onRemove(index)}
           className="font-ui text-xs uppercase tracking-widest text-base-content/30 hover:text-error transition-colors"
         >
-          Remove
+          {t('composer.attachmentRemove')}
         </button>
         <button
           type="button"
@@ -204,7 +208,7 @@ function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatur
             isFeatured ? 'text-primary' : 'text-base-content/30 hover:text-base-content'
           }`}
         >
-          {isFeatured ? 'Featured' : 'Set featured'}
+          {isFeatured ? t('composer.attachmentFeatured') : t('composer.attachmentSetFeatured')}
         </button>
       </div>
     </div>
@@ -216,6 +220,7 @@ function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatur
 export default function PostComposer({ circles = [], onPostCreated }) {
   const { user, token, serverUrl } = useSelector((state) => state.auth)
   const client = useClient()
+  const { t } = useTranslation()
 
   const [expanded, setExpanded]       = useState(false)
   const [postType, setPostType]       = useState('Note')
@@ -451,7 +456,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
       >
         <UserAvatar user={mockUser} size="sm" />
         <span className="font-reading text-base-content/40 dark:text-base-content/65 group-hover:text-base-content/70 dark:group-hover:text-base-content/85 transition-colors select-none">
-          Write something…
+          {t('composer.prompt')}
         </span>
       </div>
     )
@@ -478,6 +483,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
           <PostTypeSelector value={postType} onChange={handleTypeChange} />
           <button
             onClick={handleCancel}
+            aria-label={t('composer.close')}
             className="px-4 py-2 font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-base-content transition-colors"
           >
             ✕
@@ -498,7 +504,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
                     className="flex items-center gap-3 px-6 py-3 bg-primary text-primary-content font-ui text-sm uppercase tracking-widest hover:opacity-90 transition-opacity"
                   >
                     <FontAwesomeIcon icon={faPhotoFilm} className="text-lg" />
-                    Add photos, video, or audio
+                    {t('composer.addMedia')}
                   </button>
                 </div>
               ) : (
@@ -514,7 +520,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
                   </DndContext>
                   <button type="button" onClick={() => fileInputRef.current?.click()}
                     className="w-full px-4 py-2.5 font-ui text-xs uppercase tracking-widest text-base-content/40 hover:text-base-content hover:bg-base-200 transition-colors text-center border-t border-base-300">
-                    + Add more…
+                    {t('composer.addMore')}
                   </button>
                 </>
               )}
@@ -528,7 +534,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
               <input
                 ref={hrefInputRef}
                 type="url"
-                placeholder="https://…"
+                placeholder={t('composer.linkUrl')}
                 value={href}
                 onChange={(e) => setHref(e.target.value)}
                 onBlur={handleHrefBlur}
@@ -545,7 +551,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
                   }}
                   className="shrink-0 px-3 py-1.5 mx-2 font-ui text-xs uppercase tracking-widest bg-base-200 hover:bg-base-300 text-base-content/60 hover:text-base-content transition-colors"
                 >
-                  Paste
+                  {t('composer.linkPaste')}
                 </button>
               )}
             </div>
@@ -555,7 +561,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
           {hasTitle && (
             <input
               type="text"
-              placeholder="Title…"
+              placeholder={t('composer.title')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-3 bg-base-100 font-display text-2xl tracking-wide text-base-content placeholder:text-base-content/30 outline-none border-b-2 border-base-300"
@@ -569,24 +575,24 @@ export default function PostComposer({ circles = [], onPostCreated }) {
                 <DateTimeField
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  placeholder="Start Date"
+                  placeholder={t('composer.startDate')}
                   borderRight
                 />
                 <DateTimeField
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  placeholder="End Date"
+                  placeholder={t('composer.endDate')}
                   optional
                 />
               </div>
               <div className="flex items-center border-b-2 border-base-300 bg-base-100">
-                <input type="text" placeholder="Location…" value={location}
+                <input type="text" placeholder={t('composer.location')} value={location}
                   onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
                   className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none" />
-                {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0">optional</span>}
+                {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0">{t('common.optional')}</span>}
                 <button type="button" onClick={handleGeolocate} disabled={locating}
                   className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'}`}>
-                  {locating ? '…' : 'GPS'}
+                  {locating ? '…' : t('common.gps')}
                 </button>
               </div>
             </>
@@ -608,13 +614,13 @@ export default function PostComposer({ circles = [], onPostCreated }) {
           {/* Location — all types except Event */}
           {postType !== 'Event' && (
             <div className="flex items-center border-t-2 border-base-300 bg-base-100">
-              <input type="text" placeholder="Location…" value={location}
+              <input type="text" placeholder={t('composer.location')} value={location}
                 onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
                 className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none" />
-              {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0">optional</span>}
+              {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0">{t('common.optional')}</span>}
               <button type="button" onClick={handleGeolocate} disabled={locating}
                 className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'}`}>
-                {locating ? '…' : 'GPS'}
+                {locating ? '…' : t('common.gps')}
               </button>
             </div>
           )}
@@ -628,16 +634,16 @@ export default function PostComposer({ circles = [], onPostCreated }) {
             {error && <span className="font-ui text-xs uppercase tracking-widest text-error">{error}</span>}
             {postType === 'Note' && (
               <span className={`font-ui text-xs uppercase tracking-widest tabular-nums ${atNoteLimit ? 'text-error' : noteWarn ? 'text-warning' : 'text-base-content/30'}`}>
-                {wordCount}/{NOTE_MAX_WORDS}
+                {t('composer.wordCount', { count: wordCount, max: NOTE_MAX_WORDS })}
               </span>
             )}
             <button type="button" onClick={handleCancel}
               className="px-3 py-1.5 font-ui text-xs uppercase tracking-widest text-base-content/50 hover:text-base-content transition-colors">
-              Cancel
+              {t('common.cancel')}
             </button>
             <button type="button" onClick={handleSubmit} disabled={!canPost}
               className="px-4 py-1.5 font-ui text-xs uppercase tracking-widest bg-primary text-primary-content hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity">
-              {submitting ? 'Posting…' : 'Post'}
+              {submitting ? t('composer.posting') : t('composer.post')}
             </button>
           </div>
         </div>

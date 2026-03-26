@@ -3,6 +3,7 @@
 // Media posts additionally show a thumbnail or A/V placeholder.
 
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { MessageSquare, Smile, Play, Music } from 'lucide-react'
 import { POST_TYPES } from '../../lib/postTypes'
 import PostTypeIcon from '../ui/PostTypeIcon'
@@ -108,11 +109,12 @@ function MediaThumb({ post }) {
 }
 
 export default function PopularPosts({ posts = MOCK_POPULAR }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-0">
       <div className="flex items-center gap-2 mb-3" style={{ minHeight: '36px' }}>
         <span className="opacity-50 !w-11 !h-11" style={{ filter: 'grayscale(1)' }}><PostTypeIcon type="Article" size="lg" /></span>
-        <h3 className="font-display text-3xl tracking-wide text-base-content leading-none">Popular Posts</h3>
+        <h3 className="font-display text-3xl tracking-wide text-base-content leading-none">{t('sidebar.popularPosts')}</h3>
       </div>
       <ul className="flex flex-col gap-0">
         {posts.map((post) => {

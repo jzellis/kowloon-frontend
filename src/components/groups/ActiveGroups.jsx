@@ -2,6 +2,7 @@
 // Shows group icon, name, member count, and a snippet of the most recent post.
 
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Users } from 'lucide-react'
 import CircleIcon from '../ui/CircleIcon'
 
@@ -88,11 +89,12 @@ function GroupAvatar({ group }) {
 }
 
 export default function ActiveGroups({ groups = MOCK_GROUPS }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-0">
       <div className="flex items-center gap-2 mb-3" style={{ minHeight: '36px' }}>
         <CircleIcon type="group" size="lg" className="opacity-50 !w-11 !h-11" />
-        <h3 className="font-display text-3xl tracking-wide text-base-content leading-none">Active Groups</h3>
+        <h3 className="font-display text-3xl tracking-wide text-base-content leading-none">{t('sidebar.activeGroups')}</h3>
       </div>
       <ul className="flex flex-col gap-0">
         {groups.map((group) => (

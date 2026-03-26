@@ -3,13 +3,13 @@
 
 import { useParams, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
 import PostList from '../components/posts/PostList'
 import PostTypeIcon from '../components/ui/PostTypeIcon'
 import { toggleType, clearTypes } from '../app/feedSlice'
 
 const POST_TYPES = ['Note', 'Article', 'Media', 'Event', 'Link']
-const POST_TYPE_LABELS = { Note: 'Notes', Article: 'Articles', Media: 'Media', Event: 'Events', Link: 'Links' }
 
 const MOCK_CIRCLE = {
   id: 'circle:jazz@kwln.org',
@@ -55,6 +55,7 @@ const MOCK_POSTS = [
 function TypeFilter() {
   const dispatch = useDispatch()
   const { activeTypes } = useSelector((state) => state.feed)
+  const { t } = useTranslation()
 
   return (
     <div className="flex items-center gap-0 border-b border-base-300 pb-3">
@@ -66,7 +67,7 @@ function TypeFilter() {
             : 'bg-base-200 text-base-content/60 hover:bg-base-300'
         }`}
       >
-        All
+        {t('feed.all')}
       </button>
       {POST_TYPES.map((type) => {
         const active = activeTypes.includes(type)
@@ -74,7 +75,7 @@ function TypeFilter() {
           <button
             key={type}
             onClick={() => dispatch(toggleType(type))}
-            title={type}
+            title={t(`postTypes.${type}`, { defaultValue: type })}
             className={`flex items-center gap-1.5 px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors border-r border-base-300 last:border-r-0 ${
               active
                 ? 'bg-primary text-primary-content'
@@ -82,7 +83,7 @@ function TypeFilter() {
             }`}
           >
             <PostTypeIcon type={type} size="sm" />
-            <span className="hidden sm:inline">{POST_TYPE_LABELS[type]}</span>
+            <span className="hidden sm:inline">{t({ Note: 'feed.notes', Article: 'feed.articles', Media: 'feed.media', Event: 'feed.events', Link: 'feed.links' }[type] ?? type)}</span>
           </button>
         )
       })}
@@ -93,6 +94,7 @@ function TypeFilter() {
 export default function CirclePostsPage() {
   const { id } = useParams()
   const circle = MOCK_CIRCLE // TODO: fetch by id
+  const { t } = useTranslation()
 
   return (
     <div className="flex flex-col gap-6">

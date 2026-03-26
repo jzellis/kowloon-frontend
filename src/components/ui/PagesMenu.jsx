@@ -3,6 +3,7 @@
 // Falls back to mock data if no pages prop passed.
 
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ChevronRight } from 'lucide-react'
 
 const MOCK_PAGES = [
@@ -33,11 +34,12 @@ const MOCK_PAGES = [
 ]
 
 export default function PagesMenu({ pages = MOCK_PAGES }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-0 border-b-2 border-base-300 pb-5">
       <div className="flex items-center gap-2 mb-3" style={{ minHeight: '36px' }}>
         <img src="/page.svg" aria-hidden="true" className="w-11 h-11 shrink-0 opacity-50" />
-        <h3 className="font-display text-3xl tracking-wide text-base-content leading-none">Pages</h3>
+        <h3 className="font-display text-3xl tracking-wide text-base-content leading-none">{t('sidebar.pages')}</h3>
       </div>
       <nav className="pl-[52px]">
         <ul className="flex flex-col gap-0">

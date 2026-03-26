@@ -3,6 +3,7 @@
 // Used by PostCard whenever post.type === 'Event'.
 
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { MapPin } from 'lucide-react'
 import PostMeta from './PostMeta'
 import PostToolbar from './PostToolbar'
@@ -57,6 +58,7 @@ function CalendarBlock({ date }) {
 }
 
 export default function EventCard({ post }) {
+  const { t } = useTranslation()
   const timeRange = formatTimeRange(post?.startTime, post?.endTime)
   const locationName = post?.location?.name ?? null
   const raw  = post?.source ?? post?.content ?? ''
@@ -77,7 +79,7 @@ export default function EventCard({ post }) {
             to={`/posts/${encodeURIComponent(post?.id)}`}
             className="font-display text-4xl leading-tight tracking-wide text-base-content hover:text-primary transition-colors"
           >
-            {post?.name ?? 'Untitled Event'}
+            {post?.name ?? t('post.untitledEvent')}
           </Link>
 
           {/* Location — prominent, right below title */}

@@ -3,9 +3,11 @@
 // Props: userId (string), isFollowing (bool), onFollow (fn), onUnfollow (fn)
 
 import { useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 
 export default function FollowButton({ userId, isFollowing, onFollow, onUnfollow }) {
   const { user } = useSelector((state) => state.auth)
+  const { t } = useTranslation()
 
   if (!user || user.id === userId) return null
 
@@ -18,7 +20,7 @@ export default function FollowButton({ userId, isFollowing, onFollow, onUnfollow
           : 'bg-primary text-primary-content hover:opacity-90'
       }`}
     >
-      {isFollowing ? 'Unfollow' : 'Follow'}
+      {isFollowing ? t('common.unfollow') : t('common.follow')}
     </button>
   )
 }
