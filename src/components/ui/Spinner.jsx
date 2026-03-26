@@ -6,11 +6,11 @@ export default function Spinner({ size = 'md', centered = false }) {
 
   if (centered) {
     return (
-      <div className="flex items-center justify-center w-full py-12">
-        <span className={`loading loading-spinner ${sizes[size]} text-primary`} />
+      <div role="status" aria-live="polite" aria-label="Loading" className="flex items-center justify-center w-full py-12">
+        <span className={`loading loading-spinner ${sizes[size]} text-primary`} aria-hidden="true" />
       </div>
     )
   }
 
-  return <span className={`loading loading-spinner ${sizes[size]} text-primary`} />
+  return <span role="status" aria-live="polite" aria-label="Loading" className={`loading loading-spinner ${sizes[size]} text-primary`} />
 }

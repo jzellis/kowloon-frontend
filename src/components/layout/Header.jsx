@@ -108,7 +108,9 @@ export function Header() {
             >
               <div className="indicator">
                 <BellIcon />
-                {/* Badge wired up when notifications slice is ready */}
+                {/* Unread count badge — wired when notifications slice is ready.
+                    When rendered: add aria-label={t('a11y.notificationCount', { count })} to the Link above
+                    and role="status" aria-live="polite" aria-atomic="true" to the badge span. */}
               </div>
             </Link>
           )}

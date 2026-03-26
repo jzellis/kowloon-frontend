@@ -18,10 +18,10 @@ import AudioPlayer from '../ui/AudioPlayer'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPhotoFilm, faGripVertical } from '@fortawesome/free-solid-svg-icons'
 import {
-  DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors,
+  DndContext, closestCenter, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors,
 } from '@dnd-kit/core'
 import {
-  SortableContext, verticalListSortingStrategy, useSortable, arrayMove,
+  SortableContext, verticalListSortingStrategy, useSortable, arrayMove, sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
@@ -50,6 +50,7 @@ function TagsInput({ tags, onChange }) {
           <button
             type="button"
             onClick={() => onChange(tags.filter((t) => t !== tag))}
+            aria-label={`Remove #${tag}`}
             className="text-base-content/40 hover:text-error transition-colors leading-none ml-0.5"
           >
             &times;
@@ -68,6 +69,7 @@ function TagsInput({ tags, onChange }) {
         }}
         onBlur={commit}
         placeholder={tags.length ? '' : t('composer.tagsPlaceholder')}
+        aria-label={t('composer.tagsLabel')}
         className="flex-1 min-w-24 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none"
       />
     </div>
@@ -76,7 +78,7 @@ function TagsInput({ tags, onChange }) {
 
 // ── DateTimeField ──────────────────────────────────────────────────────────
 
-function DateTimeField({ value, onChange, placeholder, optional = false, borderRight = false }) {
+function DateTimeField({ value, onChange, placeholder, ariaLabel, optional = false, borderRight = false }) {
   const { t } = useTranslation()
   const [active, setActive] = useState(false)
   const inputRef = useRef(null)
@@ -97,10 +99,11 @@ function DateTimeField({ value, onChange, placeholder, optional = false, borderR
       <button
         type="button"
         onClick={handleActivate}
+        aria-label={ariaLabel}
         className={`flex-1 flex items-center justify-between px-4 py-2.5 bg-base-100 font-ui text-sm uppercase tracking-widest text-base-content/40 hover:text-base-content/70 transition-colors text-left ${borderClass}`}
       >
-        <span>{placeholder}</span>
-        {optional && <span className="text-base-content/30 normal-case tracking-normal text-xs italic font-reading">{t('common.optional')}</span>}
+        <span aria-hidden="true">{placeholder}</span>
+        {optional && <span className="text-base-content/30 normal-case tracking-normal text-xs italic font-reading" aria-hidden="true">{t('common.optional')}</span>}
       </button>
     )
   }
@@ -113,6 +116,7 @@ function DateTimeField({ value, onChange, placeholder, optional = false, borderR
       onChange={onChange}
       onBlur={handleBlur}
       autoFocus={!value}
+      aria-label={ariaLabel}
       className={`flex-1 px-4 py-2.5 bg-base-100 font-ui text-sm text-base-content outline-none ${borderClass}`}
     />
   )
@@ -170,8 +174,9 @@ function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatur
       {/* Drag handle */}
       <button
         type="button"
-        className="shrink-0 self-center px-2 py-1 text-base-content/25 hover:text-base-content/60 cursor-grab active:cursor-grabbing touch-none"
+        className="shrink-0 self-center px-2 py-1 text-base-content/25 hover:text-base-content/60 focus-visible:text-base-content/60 cursor-grab active:cursor-grabbing touch-none"
         aria-label={t('composer.dragToReorder')}
+        aria-roledescription="sortable"
         {...dragHandleProps}
       >
         <FontAwesomeIcon icon={faGripVertical} />
@@ -184,6 +189,7 @@ function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatur
           value={att.title}
           onChange={(e) => onUpdate(index, 'title', e.target.value)}
           placeholder={t('composer.attachmentTitle')}
+          aria-label={t('composer.attachmentTitleLabel')}
           className="bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none border-b border-base-300 pb-0.5"
         />
         <input
@@ -191,6 +197,7 @@ function AttachmentRow({ att, index, onUpdate, onRemove, isFeatured, onSetFeatur
           value={att.alt}
           onChange={(e) => onUpdate(index, 'alt', e.target.value)}
           placeholder={t('composer.attachmentAlt')}
+          aria-label={t('composer.attachmentAltLabel')}
           className="bg-transparent font-reading text-xs text-base-content/70 placeholder:text-base-content/30 outline-none"
         />
       </div>
@@ -393,6 +400,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
   const handleAttachmentDragEnd = ({ active, over }) => {
@@ -480,6 +488,9 @@ export default function PostComposer({ circles = [], onPostCreated }) {
 
       {/* Panel — overflow-hidden so content can never escape; flex body fills available space */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('composer.prompt')}
         className="relative flex flex-col w-full lg:max-w-2xl bg-base-100 border-4 border-primary overflow-hidden"
         style={{ maxHeight: 'calc(100% - 2rem)' }}
       >
@@ -540,6 +551,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
               <input
                 ref={hrefInputRef}
                 type="url"
+                aria-label={t('composer.linkUrlLabel')}
                 placeholder={t('composer.linkUrl')}
                 value={href}
                 onChange={(e) => setHref(e.target.value)}
@@ -567,6 +579,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
           {hasTitle && (
             <input
               type="text"
+              aria-label={t('composer.titleLabel')}
               placeholder={t('composer.title')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -582,23 +595,25 @@ export default function PostComposer({ circles = [], onPostCreated }) {
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   placeholder={t('composer.startDate')}
+                  ariaLabel={t('composer.startDateLabel')}
                   borderRight
                 />
                 <DateTimeField
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                   placeholder={t('composer.endDate')}
+                  ariaLabel={t('composer.endDateLabel')}
                   optional
                 />
               </div>
               <div className="flex items-center border-b-2 border-base-300 bg-base-100">
-                <input type="text" placeholder={t('composer.location')} value={location}
+                <input type="text" aria-label={t('composer.locationLabel')} placeholder={t('composer.location')} value={location}
                   onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
                   className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none" />
-                {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0">{t('common.optional')}</span>}
-                <button type="button" onClick={handleGeolocate} disabled={locating}
+                {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0" aria-hidden="true">{t('common.optional')}</span>}
+                <button type="button" onClick={handleGeolocate} disabled={locating} aria-label={t('a11y.gps')}
                   className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'}`}>
-                  {locating ? '…' : t('common.gps')}
+                  <span aria-hidden="true">{locating ? '…' : t('common.gps')}</span>
                 </button>
               </div>
             </>
@@ -620,13 +635,13 @@ export default function PostComposer({ circles = [], onPostCreated }) {
           {/* Location — all types except Event */}
           {postType !== 'Event' && (
             <div className="flex items-center border-t-2 border-base-300 bg-base-100">
-              <input type="text" placeholder={t('composer.location')} value={location}
+              <input type="text" placeholder={t('composer.location')} aria-label={t('composer.locationLabel')} value={location}
                 onChange={(e) => { setLocation(e.target.value); if (!e.target.value) setGeo(null) }}
                 className="flex-1 px-4 py-2 bg-transparent font-ui text-xs uppercase tracking-widest text-base-content placeholder:text-base-content/30 outline-none" />
-              {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0">{t('common.optional')}</span>}
-              <button type="button" onClick={handleGeolocate} disabled={locating}
+              {!location && <span className="text-base-content/30 text-xs italic font-reading shrink-0" aria-hidden="true">{t('common.optional')}</span>}
+              <button type="button" onClick={handleGeolocate} disabled={locating} aria-label={t('a11y.gps')}
                 className={`px-3 py-2 font-ui text-xs uppercase tracking-widest transition-colors shrink-0 ${geo ? 'text-primary' : locating ? 'text-base-content/20 cursor-wait' : 'text-base-content/30 hover:text-base-content'}`}>
-                {locating ? '…' : t('common.gps')}
+                <span aria-hidden="true">{locating ? '…' : t('common.gps')}</span>
               </button>
             </div>
           )}
@@ -637,7 +652,7 @@ export default function PostComposer({ circles = [], onPostCreated }) {
         <div className="flex items-center justify-between gap-3 px-3 py-2 bg-base-200 border-t-2 border-base-300 shrink-0">
           <CircleSelector circles={circles} value={audience} onChange={setAudience} showAudience allowCreate direction="up" />
           <div className="flex items-center gap-3">
-            {error && <span className="font-ui text-xs uppercase tracking-widest text-error">{error}</span>}
+            {error && <span role="alert" aria-live="assertive" className="font-ui text-xs uppercase tracking-widest text-error">{error}</span>}
             {postType === 'Note' && (
               <span className={`font-ui text-xs uppercase tracking-widest tabular-nums ${atNoteLimit ? 'text-error' : noteWarn ? 'text-warning' : 'text-base-content/30'}`}>
                 {t('composer.wordCount', { count: wordCount, max: NOTE_MAX_WORDS })}

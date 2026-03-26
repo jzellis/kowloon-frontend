@@ -3,6 +3,7 @@
 // Props: onClose fn(), onCreated fn(circle)
 
 import { useState, useEffect, useRef } from 'react'
+import FocusTrap from 'focus-trap-react'
 import { useTranslation } from 'react-i18next'
 import { X, Camera } from 'lucide-react'
 
@@ -40,16 +41,6 @@ export default function NewCircleModal({ onClose, onCreated }) {
     e.target.value = ''
   }
 
-  // Focus name input on open; close on Escape
-  useEffect(() => {
-    nameRef.current?.focus()
-    function handleKey(e) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKey)
-    return () => document.removeEventListener('keydown', handleKey)
-  }, [onClose])
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!name.trim()) { setError('Name is required.'); return }
@@ -86,13 +77,17 @@ export default function NewCircleModal({ onClose, onCreated }) {
       />
 
       {/* Panel */}
+      <FocusTrap focusTrapOptions={{ initialFocus: () => nameRef.current, onDeactivate: onClose, escapeDeactivates: true }}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="new-circle-title"
         className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-base-100 border-2 border-base-300 border-t-4 border-t-primary shadow-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b-2 border-base-300 bg-base-200">
-          <h2 className="font-display text-2xl tracking-wide">{t('circle.newTitle')}</h2>
+          <h2 id="new-circle-title" className="font-display text-2xl tracking-wide">{t('circle.newTitle')}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -112,7 +107,7 @@ export default function NewCircleModal({ onClose, onCreated }) {
               type="button"
               onClick={() => iconInputRef.current?.click()}
               className="relative shrink-0 group"
-              title={t('circle.iconLabel')}
+              aria-label={t('circle.iconLabel')}
             >
               <div className="w-14 h-14 bg-secondary flex items-center justify-center" style={hexMask}>
                 {iconPreview
@@ -199,6 +194,7 @@ export default function NewCircleModal({ onClose, onCreated }) {
 
         </form>
       </div>
+      </FocusTrap>
     </>
   )
 }

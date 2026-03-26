@@ -114,7 +114,7 @@ export default function PostList({ posts = [], page, totalPages, onPageChange, l
   }
 
   return (
-    <div className="flex flex-col">
+    <div role="feed" aria-busy={loading} className="flex flex-col">
       {visible.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}
