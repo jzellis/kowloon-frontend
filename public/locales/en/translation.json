@@ -110,8 +110,26 @@
     "Server": "Server"
   },
 
+  "circles": {
+    "browse": "Circles",
+    "total": "circles",
+    "empty": "No circles found."
+  },
+
+  "sort": {
+    "newest": "Newest",
+    "popular": "Popular"
+  },
+
+  "pagination": {
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+
   "circle": {
     "searchPlaceholder": "Search circles…",
+    "reacts": "reacts",
     "public": "Public",
     "publicSummary": "Anyone",
     "server": "Server",
@@ -123,6 +141,7 @@
     "postsLink": "Posts From This Circle",
     "members": "Members",
     "newTitle": "New Circle",
+    "copyTitle": "Copy Circle",
     "iconLabel": "Set circle icon",
     "nameLabel": "Name",
     "namePlaceholder": "e.g. Music Friends",

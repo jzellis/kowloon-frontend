@@ -15,13 +15,13 @@ const hexMask = {
   maskPosition: 'center',
 }
 
-export default function NewCircleModal({ onClose, onCreated }) {
+export default function NewCircleModal({ onClose, onCreated, initialData, title }) {
   const { t } = useTranslation()
-  const [name, setName]           = useState('')
-  const [summary, setSummary]     = useState('')
-  const [members, setMembers]     = useState('')
+  const [name, setName]           = useState(initialData?.name ?? '')
+  const [summary, setSummary]     = useState(initialData?.summary ?? '')
+  const [members, setMembers]     = useState(initialData?.members?.join(', ') ?? '')
   const [iconFile, setIconFile]   = useState(null)
-  const [iconPreview, setIconPreview] = useState(null)
+  const [iconPreview, setIconPreview] = useState(initialData?.icon ?? null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]         = useState(null)
 
@@ -87,7 +87,7 @@ export default function NewCircleModal({ onClose, onCreated }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b-2 border-base-300 bg-base-200">
-          <h2 id="new-circle-title" className="font-display text-2xl tracking-wide">{t('circle.newTitle')}</h2>
+          <h2 id="new-circle-title" className="font-display text-2xl tracking-wide">{title ?? t('circle.newTitle')}</h2>
           <button
             type="button"
             onClick={onClose}
