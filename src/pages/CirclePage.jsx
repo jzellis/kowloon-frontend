@@ -23,6 +23,7 @@ const MOCK_CIRCLE = {
   icon: 'https://picsum.photos/seed/jazz11/200/200',
   description: 'From bebop to free jazz. New recordings, old recordings, gear, theory, gigs. All eras, all traditions — the only requirement is that someone is listening.',
   memberCount: 91,
+  reactCount: 38,
   attributedTo: { id: '@recordhead@kwln.org', username: 'recordhead', displayName: 'Record Head', profile: { icon: 'https://picsum.photos/seed/recordhead/200/200' } },
   members: [
     { id: '@jzellis@kwln.org',       username: 'jzellis',       displayName: 'Joshua Ellis',       profile: { icon: 'https://picsum.photos/seed/jzellis/200/200',       bio: 'Writer, musician, and general troublemaker. Making things on the internet since 1994.' } },
@@ -98,7 +99,13 @@ export default function CirclePage() {
                 {circle.attributedTo.displayName}
               </Link>
               <span>·</span>
-              <span>{circle.memberCount} members</span>
+              <span>{circle.memberCount} {t('circle.members', { defaultValue: 'members' })}</span>
+              {circle.reactCount > 0 && (
+                <>
+                  <span>·</span>
+                  <span>{circle.reactCount} {t('circle.reacts', { defaultValue: 'reacts' })}</span>
+                </>
+              )}
             </div>
             {circle.description && (
               <p className="font-reading text-base text-base-content/80 leading-relaxed">

@@ -1,5 +1,13 @@
 // CirclesPage — Browse public/server-visible circles, sortable by date or reacts.
 
+const MOCK_CIRCLES = [
+  { id: 'circle:jazz@local', name: 'Jazz & Improvisation', summary: 'From bebop to free jazz — players, listeners, and obsessives welcome.', memberCount: 142, reactCount: 61, actor: { displayName: 'Miles Davis' }, actorId: 'user:miles@local', members: [] },
+  { id: 'circle:design@local', name: 'Midcentury Design', summary: 'Eames, Saarinen, Noguchi, and everything in between. Post your finds.', memberCount: 89, reactCount: 34, actor: { displayName: 'Ray Eames' }, actorId: 'user:ray@local', members: [] },
+  { id: 'circle:film@local', name: 'Film Noir', summary: 'Hard-boiled cinema, femmes fatales, and perpetual rain. Screenings and discussion.', memberCount: 57, reactCount: 18, actor: { displayName: 'Billy Wilder' }, actorId: 'user:billy@local', members: [] },
+  { id: 'circle:print@local', name: 'Letterpress & Print', summary: 'Type nerds, ink lovers, and anyone who thinks movable type was a good idea.', memberCount: 34, reactCount: 8, actor: { displayName: 'Ben Franklin' }, actorId: 'user:ben@local', members: [] },
+  { id: 'circle:food@local', name: 'Corner Diner', summary: 'Recipes, dives, and the pursuit of the perfect pie. No fusion.', memberCount: 201, reactCount: 94, actor: { displayName: 'Julia Child' }, actorId: 'user:julia@local', members: [] },
+]
+
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
@@ -114,6 +122,14 @@ export default function CirclesPage() {
   const [copySource, setCopySource] = useState(null)
 
   const load = useCallback(async (sortOrder, pageNum) => {
+    if (!client) {
+      const sorted = [...MOCK_CIRCLES].sort((a, b) =>
+        sortOrder === 'reacts' ? b.reactCount - a.reactCount : b.id.localeCompare(a.id)
+      )
+      setCircles(sorted)
+      setTotalItems(sorted.length)
+      return
+    }
     setLoading(true)
     setError(null)
     try {
