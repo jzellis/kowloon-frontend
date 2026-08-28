@@ -151,7 +151,15 @@ export default function PicsGridPage() {
           posts={items}
           activePostIndex={active.postIndex}
           activePhotoIndex={active.photoIndex}
-          onNavigatePhoto={(photoIndex) => setActive((prev) => ({ ...prev, photoIndex }))}
+          // MediaLightbox's onNavigate passes a DELTA (-1/+1), not an absolute
+          // index — wrap within the current post's own attachment count,
+          // mirroring MediaLightbox's own internal prev/next indexing.
+          onNavigatePhoto={(delta) => setActive((prev) => {
+            const post = items[prev.postIndex]
+            const len = post?.attachments?.length ?? 1
+            const nextPhotoIndex = ((prev.photoIndex + delta) % len + len) % len
+            return { ...prev, photoIndex: nextPhotoIndex }
+          })}
           onNavigatePost={(postIndex) => setActive({ postIndex, photoIndex: 0 })}
           onClose={() => setActive(null)}
         />
