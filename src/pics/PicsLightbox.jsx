@@ -94,7 +94,11 @@ export default function PicsLightbox({ posts, activePostIndex, activePhotoIndex,
       onTouchMoveCapture={handleTouchMoveCapture}
       onTouchEndCapture={handleTouchEndCapture}
     >
-      <MediaLightbox items={attachments} index={activePhotoIndex} onClose={onClose} onNavigate={onNavigatePhoto} />
+      {/* key={post.id} forces a full remount on post change — MediaLightbox's
+          own swipe-commit is a 250ms setTimeout with no cleanup; without a
+          remount its internal drag/zoom state (and, if it fires late, its
+          captured onNavigate closure) can bleed into the next post. */}
+      <MediaLightbox key={post.id} items={attachments} index={activePhotoIndex} onClose={onClose} onNavigate={onNavigatePhoto} />
 
       {/* Info panel — fixed sibling layered above MediaLightbox's full-bleed image. */}
       <div className="fixed inset-x-0 bottom-0 z-[110] max-h-[45vh] overflow-y-auto bg-base-100 text-base-content border-t-2 border-base-300 px-4 py-4 flex flex-col gap-3">

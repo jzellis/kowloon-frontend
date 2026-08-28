@@ -154,12 +154,27 @@ export default function PicsGridPage() {
           // MediaLightbox's onNavigate passes a DELTA (-1/+1), not an absolute
           // index — wrap within the current post's own attachment count,
           // mirroring MediaLightbox's own internal prev/next indexing.
-          onNavigatePhoto={(delta) => setActive((prev) => {
-            const post = items[prev.postIndex]
-            const len = post?.attachments?.length ?? 1
-            const nextPhotoIndex = ((prev.photoIndex + delta) % len + len) % len
-            return { ...prev, photoIndex: nextPhotoIndex }
-          })}
+          //
+          // `boundPostIndex` guards against a real race: MediaLightbox commits
+          // a horizontal swipe via a 250ms setTimeout with no cleanup. If the
+          // user swipes vertically (switches posts) while that timer is still
+          // pending, it fires afterward and would otherwise apply its stale
+          // delta to the NEW post's photoIndex — the caption already updated,
+          // but the image would then jump to an unrelated photo a moment
+          // later ("images and post data don't sync up"). Capturing which
+          // post this specific handler instance was created for, and no-op'ing
+          // if the active post has since changed, makes a late-firing stale
+          // call harmless.
+          onNavigatePhoto={(() => {
+            const boundPostIndex = active.postIndex
+            return (delta) => setActive((prev) => {
+              if (prev.postIndex !== boundPostIndex) return prev
+              const post = items[prev.postIndex]
+              const len = post?.attachments?.length ?? 1
+              const nextPhotoIndex = ((prev.photoIndex + delta) % len + len) % len
+              return { ...prev, photoIndex: nextPhotoIndex }
+            })
+          })()}
           onNavigatePost={(postIndex) => setActive({ postIndex, photoIndex: 0 })}
           onClose={() => setActive(null)}
         />
