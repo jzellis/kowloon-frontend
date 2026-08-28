@@ -24,7 +24,18 @@ import PostReacts from '../components/posts/PostReacts'
 import PostToolbar from '../components/posts/PostToolbar'
 
 const VERTICAL_SWIPE_THRESHOLD = 60
-const AXIS_LOCK_THRESHOLD = 10
+// Left/right (photo-within-post) is the primary, expected gesture; up/down
+// (post-to-post) is secondary and should only fire on a clearly vertical
+// drag. A real finger rarely moves in a perfectly straight line — a swipe
+// that's fundamentally horizontal often has a few pixels of vertical jitter
+// in its first moments. A low threshold + simple ">" tie-break locked onto
+// "vertical" from that jitter alone, misrouting an intended left/right swipe
+// into a post-to-post jump (looked like "randomly jumping to a different
+// image"). Raising the threshold and requiring vertical to clearly dominate
+// (not just edge out) fixes that without making intentional up/down swipes
+// harder to trigger.
+const AXIS_LOCK_THRESHOLD = 18
+const VERTICAL_DOMINANCE_RATIO = 1.5
 
 export default function PicsLightbox({ posts, activePostIndex, activePhotoIndex, onNavigatePhoto, onNavigatePost, onClose }) {
   const post = posts[activePostIndex]
@@ -45,7 +56,7 @@ export default function PicsLightbox({ posts, activePostIndex, activePhotoIndex,
     const dx = t.clientX - touchStartRef.current.x
     const dy = t.clientY - touchStartRef.current.y
     if (!axisRef.current && (Math.abs(dx) > AXIS_LOCK_THRESHOLD || Math.abs(dy) > AXIS_LOCK_THRESHOLD)) {
-      axisRef.current = Math.abs(dy) > Math.abs(dx) ? 'y' : 'x'
+      axisRef.current = Math.abs(dy) > Math.abs(dx) * VERTICAL_DOMINANCE_RATIO ? 'y' : 'x'
     }
     // Vertical drag: keep MediaLightbox's own horizontal handler from ever seeing it.
     if (axisRef.current === 'y') e.stopPropagation()
