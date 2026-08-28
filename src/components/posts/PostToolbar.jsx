@@ -79,7 +79,7 @@ function postAudienceTier(post) {
 
 // ── ShareButton ──────────────────────────────────────────────────────────────
 
-function ShareButton({ post, t, user }) {
+export function ShareButton({ post, t, user }) {
   const [sharing, setSharing] = useState(false)
 
   if (!user) return null
@@ -392,7 +392,7 @@ function PostMoreMenu({ post, t, user, onDeleted }) {
 
 // ── PostToolbar ──────────────────────────────────────────────────────────────
 
-export default function PostToolbar({ post, onDeleted }) {
+export default function PostToolbar({ post, onDeleted, onReplyClick }) {
   const { user } = useSelector((state) => state.auth)
   const { t } = useTranslation()
   const [bookmarking, setBookmarking] = useState(false)
@@ -417,7 +417,7 @@ export default function PostToolbar({ post, onDeleted }) {
         {post?.id && (
           <button
             type="button"
-            onClick={() => setReplyOpen(true)}
+            onClick={() => (onReplyClick ? onReplyClick() : setReplyOpen(true))}
             title={t('post.reply', { defaultValue: 'Reply' })}
             aria-label={t('post.reply', { defaultValue: 'Reply' })}
             className="inline-flex items-center gap-1.5 text-base text-base-content/50 hover:text-base-content transition-colors"
@@ -428,7 +428,7 @@ export default function PostToolbar({ post, onDeleted }) {
             )}
           </button>
         )}
-        {post?.id && (
+        {post?.id && !onReplyClick && (
           <ReplyModal
             post={post}
             open={replyOpen}

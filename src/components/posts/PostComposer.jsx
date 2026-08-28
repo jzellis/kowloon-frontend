@@ -328,7 +328,14 @@ function AttachmentRow({ att, index, onUpdate, onRemove, dragHandleProps = {}, u
 
 // ── Main component ─────────────────────────────────────────────────────────
 
-export default function PostComposer({ onPostCreated, onClose, initialValues = {}, defaultOpen = false, prompt, open, onOpenChange, hideTrigger = false }) {
+export default function PostComposer({
+  onPostCreated, onClose, initialValues = {}, defaultOpen = false, prompt, open, onOpenChange, hideTrigger = false,
+  // lockType: pins postType to its initial value (used by e.g. a "Add Media"
+  // deep-entry flow where switching types would be confusing/wrong).
+  // mediaAccept: override the Media file input's accept filter.
+  // autoOpenFilePicker: auto-trigger the Media file picker once on mount.
+  lockType = false, mediaAccept = 'image/*,audio/*,video/*', autoOpenFilePicker = false,
+}) {
   const { user } = useSelector((state) => state.auth)
   const { items: rawCircles } = useSelector((state) => state.myCircles)
   // Order circles by the user's pins so the audience picker matches everywhere.
@@ -408,7 +415,10 @@ export default function PostComposer({ onPostCreated, onClose, initialValues = {
     || initialValues.href
     || initialValues.target
     || initialValues.title
-  const draftKey = user && !isPrefilled ? `post:${user.id}` : null
+  // Locked-type instances (e.g. a Media-only deep entry) skip the shared
+  // draft entirely — they'd otherwise read/write the same `post:${user.id}`
+  // key as the normal composer and cross-contaminate its saved postType.
+  const draftKey = user && !isPrefilled && !lockType ? `post:${user.id}` : null
   const draft = useDraft(draftKey)
   const draftRestoredRef = useRef(false)
 
@@ -498,7 +508,9 @@ export default function PostComposer({ onPostCreated, onClose, initialValues = {
     draftRestoredRef.current = true
     const saved = draft.load()
     if (!saved) return
-    if (saved.postType) setPostType(saved.postType)
+    // lockType wins over a stale draft — postType must never move away from
+    // its initial value while locked, even if draftKey isolation is bypassed.
+    if (saved.postType && !lockType) setPostType(saved.postType)
     if (saved.content) setContent(saved.content)
     if (saved.title) setTitle(saved.title)
     if (saved.href) setHref(saved.href)
@@ -550,6 +562,21 @@ export default function PostComposer({ onPostCreated, onClose, initialValues = {
     // between pages with the same composer doesn't re-trigger.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const autoOpenedFilePickerRef = useRef(false)
+
+  // Auto-open the native file picker for a Media deep-entry flow. Must fire
+  // synchronously in the effect body (NOT via setTimeout, even 0ms) — some
+  // browsers only allow window.showOpenFilePicker-style dialogs to open
+  // within the same tick as the user gesture that led here, and a deferred
+  // callback breaks that chain. Guarded by a ref so it only ever fires once
+  // per mount, not on every re-render or every `expanded` transition.
+  useEffect(() => {
+    if (!autoOpenFilePicker || autoOpenedFilePickerRef.current) return
+    if (!expanded || postType !== 'Media') return
+    autoOpenedFilePickerRef.current = true
+    fileInputRef.current?.click()
+  }, [autoOpenFilePicker, expanded, postType])
 
   const handleCancel = () => {
     draft.clear()
@@ -876,22 +903,26 @@ export default function PostComposer({ onPostCreated, onClose, initialValues = {
             {/* Thin internal separator */}
             <div className="w-px bg-base-300 self-stretch" />
 
-            {/* Right: Type selector */}
+            {/* Right: Type selector — disabled/no-op while lockType pins the
+                post type (e.g. a Media-only deep entry). */}
             <button
               type="button"
-              onClick={() => setTypeDropdownOpen((v) => !v)}
-              className="flex items-center gap-2 px-4 py-3 bg-base-100 text-base-content font-ui text-xs font-bold uppercase tracking-widest transition-colors"
+              onClick={() => { if (!lockType) setTypeDropdownOpen((v) => !v) }}
+              disabled={lockType}
+              className="flex items-center gap-2 px-4 py-3 bg-base-100 text-base-content font-ui text-xs font-bold uppercase tracking-widest transition-colors disabled:opacity-60 disabled:cursor-default"
               aria-haspopup="listbox"
               aria-expanded={typeDropdownOpen}
             >
               <PostTypeIcon type={postType} size="sm" />
               <span style={{ color: POST_TYPES[postType]?.color ?? 'inherit' }}>{postType}</span>
-              <ChevronDown size={11} className="opacity-50 ml-0.5" />
+              {!lockType && <ChevronDown size={11} className="opacity-50 ml-0.5" />}
             </button>
             </div>{/* end shared border frame */}
 
-            {/* Type dropdown — left-aligned to the full button group */}
-            {typeDropdownOpen && (
+            {/* Type dropdown — left-aligned to the full button group. Belt-and-
+                suspenders: never rendered while lockType is set, even if
+                typeDropdownOpen was somehow left true. */}
+            {typeDropdownOpen && !lockType && (
               <div
                 role="listbox"
                 className="absolute top-full left-0 mt-0.5 bg-base-100 border-2 border-base-300 z-[200] min-w-full shadow-lg"
@@ -963,21 +994,26 @@ export default function PostComposer({ onPostCreated, onClose, initialValues = {
             hid Event, making Events uncreatable. */}
         <div className="flex items-center justify-between px-4 py-3 border-b-2 border-base-300 bg-base-200 shrink-0">
           <div className="relative">
+            {/* lockType pins the post type — the menu never opens, so the
+                caller's initial type (e.g. Media) can't be switched away from. */}
             <button
               type="button"
-              onClick={() => setTypeMenuOpen((o) => !o)}
+              onClick={() => { if (!lockType) setTypeMenuOpen((o) => !o) }}
+              disabled={lockType}
               aria-haspopup="listbox"
               aria-expanded={typeMenuOpen}
-              className="flex items-center gap-2 font-display text-xl tracking-wide"
+              className="flex items-center gap-2 font-display text-xl tracking-wide disabled:cursor-default"
             >
               <PostTypeIcon type={postType} size="sm" />
               {t('composer.addNew', { defaultValue: 'Add New' })}{' '}
               <span style={{ color: POST_TYPES[postType]?.color }}>
                 {t(`postTypes.${postType}`, { defaultValue: postType })}
               </span>
-              <ChevronDown size={18} className={`transition-transform ${typeMenuOpen ? 'rotate-180' : ''}`} />
+              {!lockType && <ChevronDown size={18} className={`transition-transform ${typeMenuOpen ? 'rotate-180' : ''}`} />}
             </button>
-            {typeMenuOpen && (
+            {/* Belt-and-suspenders: never rendered while locked, even if
+                typeMenuOpen was somehow left true. */}
+            {typeMenuOpen && !lockType && (
               <ul
                 role="listbox"
                 className="absolute left-0 top-full mt-1 z-10 w-52 bg-base-100 border-2 border-base-300 shadow-lg"
@@ -1042,7 +1078,7 @@ export default function PostComposer({ onPostCreated, onClose, initialValues = {
                   </button>
                 </>
               )}
-              <input ref={fileInputRef} type="file" multiple accept="image/*,audio/*,video/*" className="hidden" onChange={handleFileAdd} />
+              <input ref={fileInputRef} type="file" multiple accept={mediaAccept} className="hidden" onChange={handleFileAdd} />
             </div>
           )}
 

@@ -50,14 +50,21 @@ export function resolveServerUrl(explicit) {
 // half-logged-in showing raw "Authentication required" errors (#57). Dynamic
 // imports avoid an import cycle (store/router pull in the client); the guard
 // prevents a redirect storm when several requests fail at once.
+//
+// Hostname-aware router import: the pics.* subdomain (see src/pics/) mounts
+// its own separate `picsRouter`, not the main site's `app/router.jsx` — only
+// one of the two is ever actually rendered for a given page load, so this
+// must import whichever one that is, or the `.navigate()` call below targets
+// an unmounted router instance and silently does nothing.
 let _handlingExpiry = false
 function handleSessionExpired() {
   if (_handlingExpiry) return
   _handlingExpiry = true
+  const isPics = window?.location?.hostname?.startsWith('pics.')
   Promise.all([
     import('../app/store.js'),
     import('../features/auth/authSlice.js'),
-    import('../app/router.jsx'),
+    isPics ? import('../pics/picsRouter.jsx') : import('../app/router.jsx'),
   ])
     .then(([{ store }, { clearAuth }, routerMod]) => {
       store.dispatch(clearAuth())

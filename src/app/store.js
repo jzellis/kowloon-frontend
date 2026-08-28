@@ -24,9 +24,13 @@ store.dispatch(fetchThemesAsync())
 // Restore session and server info in parallel.
 store.dispatch(fetchServerInfoAsync())
 store.dispatch(restoreSessionAsync()).then((action) => {
-  // If the restored user has a theme preference, apply it over the default.
+  // If the restored user has a theme preference, apply it over the default —
+  // except on pics.<domain>, which forces its own dark theme with no toggle
+  // (src/pics/PicsApp.jsx) and must never be overridden by an account's
+  // saved main-site preference.
   const userTheme = action.payload?.prefs?.theme
-  if (userTheme) {
+  const isPics = window?.location?.hostname?.startsWith('pics.')
+  if (userTheme && !isPics) {
     store.dispatch(setActiveTheme(userTheme))
   }
 })
