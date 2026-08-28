@@ -17,11 +17,28 @@
 // handler, and drives post-to-post nav instead; a mostly-horizontal drag is
 // left alone entirely and falls through to MediaLightbox exactly as today.
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import MediaLightbox from '../components/ui/MediaLightbox'
 import PostMeta from '../components/posts/PostMeta'
 import PostReacts from '../components/posts/PostReacts'
 import PostToolbar from '../components/posts/PostToolbar'
+
+// Post-to-post slide: whichever post is leaving exits toward the swipe
+// direction, the incoming one enters from the opposite edge — the "swipe up
+// reveals the next post" feel of a vertical feed (TikTok/Reels-style), even
+// though there's no interactive drag-follow like the horizontal photo swipe
+// has (MediaLightbox owns that engine; this is a simpler, non-interactive
+// slide layered on top for the axis MediaLightbox doesn't know about).
+// `direction` is +1 moving to the next post (swipe up), -1 to the previous
+// (swipe down) — passed as framer-motion's `custom` so enter/exit variants
+// can react to which way we're going.
+const postSlideVariants = {
+  enter: (direction) => ({ y: direction >= 0 ? '100%' : '-100%' }),
+  center: { y: 0 },
+  exit: (direction) => ({ y: direction >= 0 ? '-100%' : '100%' }),
+}
+const POST_TRANSITION = { duration: 0.28, ease: 'easeInOut' }
 
 const VERTICAL_SWIPE_THRESHOLD = 60
 // Left/right (photo-within-post) is the primary, expected gesture; up/down
@@ -43,6 +60,15 @@ export default function PicsLightbox({ posts, activePostIndex, activePhotoIndex,
 
   const touchStartRef = useRef(null)
   const axisRef = useRef(null)
+  const [direction, setDirection] = useState(0)
+
+  // Record which way we're navigating before telling the parent, so the
+  // slide-out/slide-in variants know which edge to use once this re-renders
+  // with the new post.
+  function goToPost(newIndex, dir) {
+    setDirection(dir)
+    onNavigatePost(newIndex)
+  }
 
   const handleTouchStartCapture = (e) => {
     const t = e.touches[0]
@@ -67,8 +93,8 @@ export default function PicsLightbox({ posts, activePostIndex, activePhotoIndex,
       const t = e.changedTouches[0]
       const dy = t.clientY - touchStartRef.current.y
       e.stopPropagation()
-      if (dy < -VERTICAL_SWIPE_THRESHOLD && activePostIndex < posts.length - 1) onNavigatePost(activePostIndex + 1)
-      else if (dy > VERTICAL_SWIPE_THRESHOLD && activePostIndex > 0) onNavigatePost(activePostIndex - 1)
+      if (dy < -VERTICAL_SWIPE_THRESHOLD && activePostIndex < posts.length - 1) goToPost(activePostIndex + 1, 1)
+      else if (dy > VERTICAL_SWIPE_THRESHOLD && activePostIndex > 0) goToPost(activePostIndex - 1, -1)
     }
     touchStartRef.current = null
     axisRef.current = null
@@ -77,11 +103,12 @@ export default function PicsLightbox({ posts, activePostIndex, activePhotoIndex,
   // Up/Down arrow keys — MediaLightbox already owns Left/Right/Esc internally.
   useEffect(() => {
     function onKey(e) {
-      if (e.key === 'ArrowUp' && activePostIndex > 0) onNavigatePost(activePostIndex - 1)
-      else if (e.key === 'ArrowDown' && activePostIndex < posts.length - 1) onNavigatePost(activePostIndex + 1)
+      if (e.key === 'ArrowUp' && activePostIndex > 0) goToPost(activePostIndex - 1, -1)
+      else if (e.key === 'ArrowDown' && activePostIndex < posts.length - 1) goToPost(activePostIndex + 1, 1)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePostIndex, posts.length, onNavigatePost])
 
   if (!post) return null
@@ -90,37 +117,58 @@ export default function PicsLightbox({ posts, activePostIndex, activePhotoIndex,
 
   return (
     <div
+      className="fixed inset-0 z-[100] overflow-hidden"
       onTouchStartCapture={handleTouchStartCapture}
       onTouchMoveCapture={handleTouchMoveCapture}
       onTouchEndCapture={handleTouchEndCapture}
     >
-      {/* key={post.id} forces a full remount on post change — MediaLightbox's
-          own swipe-commit is a 250ms setTimeout with no cleanup; without a
-          remount its internal drag/zoom state (and, if it fires late, its
-          captured onNavigate closure) can bleed into the next post. */}
-      <MediaLightbox key={post.id} items={attachments} index={activePhotoIndex} onClose={onClose} onNavigate={onNavigatePhoto} />
+      <AnimatePresence initial={false} custom={direction}>
+        {/* Single motion.div per post — MediaLightbox's own root is `position:
+            fixed`, and a transform on an ancestor (which framer-motion's `y`
+            animation applies via CSS transform) changes what `fixed`
+            descendants are positioned relative to, so animating this ONE
+            wrapper moves the image and the info panel together as one card.
+            key={post.id} both drives AnimatePresence's enter/exit tracking
+            AND forces MediaLightbox to fully remount on post change — its
+            own swipe-commit is a 250ms setTimeout with no cleanup, so
+            without a remount its internal drag/zoom state (and, if it fires
+            late, its captured onNavigate closure) could bleed into the next
+            post. */}
+        <motion.div
+          key={post.id}
+          custom={direction}
+          variants={postSlideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={POST_TRANSITION}
+          className="absolute inset-0"
+        >
+          <MediaLightbox items={attachments} index={activePhotoIndex} onClose={onClose} onNavigate={onNavigatePhoto} />
 
-      {/* Info panel — fixed sibling layered above MediaLightbox's full-bleed image. */}
-      <div className="fixed inset-x-0 bottom-0 z-[110] max-h-[45vh] overflow-y-auto bg-base-100 text-base-content border-t-2 border-base-300 px-4 py-4 flex flex-col gap-3">
-        <PostMeta post={post} />
-        {post?.body && (
-          // Server-sanitized HTML (same trust boundary the main site's PostBody
-          // already relies on) — not re-rendering PostBody itself here, since
-          // it would also try to render this Media post's own attachment
-          // gallery a second time (the photo is already the fullscreen image).
-          <div
-            className="reading-surface font-reading text-sm max-h-32 overflow-y-auto"
-            dangerouslySetInnerHTML={{ __html: post.body }}
-          />
-        )}
-        <PostReacts post={post} />
-        <PostToolbar
-          post={post}
-          onReplyClick={() => {
-            window.location.href = `${window.location.protocol}//${mainDomain}/posts/${encodeURIComponent(post.id)}`
-          }}
-        />
-      </div>
+          {/* Info panel — fixed sibling layered above MediaLightbox's full-bleed image. */}
+          <div className="fixed inset-x-0 bottom-0 z-[110] max-h-[45vh] overflow-y-auto bg-base-100 text-base-content border-t-2 border-base-300 px-4 py-4 flex flex-col gap-3">
+            <PostMeta post={post} />
+            {post?.body && (
+              // Server-sanitized HTML (same trust boundary the main site's PostBody
+              // already relies on) — not re-rendering PostBody itself here, since
+              // it would also try to render this Media post's own attachment
+              // gallery a second time (the photo is already the fullscreen image).
+              <div
+                className="reading-surface font-reading text-sm max-h-32 overflow-y-auto"
+                dangerouslySetInnerHTML={{ __html: post.body }}
+              />
+            )}
+            <PostReacts post={post} />
+            <PostToolbar
+              post={post}
+              onReplyClick={() => {
+                window.location.href = `${window.location.protocol}//${mainDomain}/posts/${encodeURIComponent(post.id)}`
+              }}
+            />
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }
