@@ -144,7 +144,7 @@ export default function PicsGridPage() {
 
       <LoadMoreButton hasMore={hasMore} loading={loadingMore} onClick={loadMore} />
 
-      <PicsComposeFab onPostCreated={() => setRefreshKey((k) => k + 1)} />
+      {user && <PicsComposeFab onPostCreated={() => setRefreshKey((k) => k + 1)} />}
 
       {active && (
         <PicsLightbox
