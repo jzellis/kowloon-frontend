@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import ReactButton from '../components/posts/ReactButton'
 import { ShareButton, ReplyButton } from '../components/posts/PostToolbar'
-import PostReacts from '../components/posts/PostReacts'
 import UserAvatar from '../components/ui/UserAvatar'
 import sizedUrl from '../lib/sizedUrl'
 
@@ -62,11 +61,14 @@ export default function PhotoCard({ post, attachment, photoCount = 1, onOpen }) 
             {title && <span className="font-ui text-[10px] text-white/75 truncate">{title}</span>}
           </div>
         </div>
+        {/* Hidden on phone — too cramped alongside the avatar/name/id/title
+            block at that width; the react/reply/share row still fits fine on
+            tablet and desktop. React count already lives on ReactButton
+            itself, so there's no separate "preview" element to duplicate it. */}
         <div
-          className="flex items-center gap-2.5 shrink-0 [&_button]:text-white [&_button:hover]:text-white/70 [&_svg]:drop-shadow-sm [&_span]:text-white/90"
+          className="hidden sm:flex items-center gap-2.5 shrink-0 [&_button]:text-white [&_button:hover]:text-white/70 [&_svg]:drop-shadow-sm"
           onClick={(e) => e.stopPropagation()}
         >
-          <PostReacts post={post} />
           <ReplyButton
             post={post}
             t={t}
