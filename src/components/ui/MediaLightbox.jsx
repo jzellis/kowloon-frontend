@@ -2,12 +2,18 @@ import { useEffect, useState, useRef } from 'react'
 import { Play, Music, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import AudioPlayer from './AudioPlayer'
 
-// How much of the neighbouring photo peeks in at the screen edge at rest,
-// when edgePeek is on. Applied as a static offset on the SAME carousel-track
-// slides the drag gesture already animates (not separate elements), so the
-// peek naturally tracks the swipe/click and matches the main image's own
-// object-contain scale exactly instead of a separately-scaled crop.
-const EDGE_PEEK_PX = 16
+// Width of the dimmed edge-peek strip, and how dim. A narrow, fixed-size
+// strip cropped via object-cover — NOT a slice of the real object-contain
+// carousel slide. That's deliberate: object-contain images are letterboxed
+// to fit the viewport, so on anything but a full-bleed photo (tall/square
+// images on a wide screen, landscape on a tablet, etc.) the real image often
+// doesn't reach the screen edge at all — a peek anchored to "the edge of the
+// real slide" ends up sitting in dead black space, invisible. A fixed-size
+// object-cover strip pinned to the true viewport edge is always full of
+// (cropped) content, so it's visible regardless of the current photo's own
+// aspect ratio / letterboxing.
+const EDGE_PEEK_WIDTH = 'w-7 sm:w-10'
+const EDGE_PEEK_DIM = 0.45
 
 // Caption bar for the currently-shown image — translucent black bg, bottom of
 // the frame. Renders nothing when the attachment has no title (most don't).
@@ -232,14 +238,7 @@ export default function MediaLightbox({ items, index, onClose, onNavigate, edgeP
             transition: trackTransition,
           }}
         >
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{
-              transform: `translateX(calc(-100% + ${edgePeek ? EDGE_PEEK_PX : 0}px))`,
-              filter: edgePeek && !dragging ? 'brightness(0.4)' : 'none',
-              transition: 'filter 150ms ease-out',
-            }}
-          >
+          <div className="absolute inset-0 -translate-x-full flex items-center justify-center">
             {renderCarouselSlide(prevItem)}
           </div>
           <div
@@ -249,14 +248,7 @@ export default function MediaLightbox({ items, index, onClose, onNavigate, edgeP
             {renderImage(item)}
             <ImageCaption item={item} />
           </div>
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{
-              transform: `translateX(calc(100% - ${edgePeek ? EDGE_PEEK_PX : 0}px))`,
-              filter: edgePeek && !dragging ? 'brightness(0.4)' : 'none',
-              transition: 'filter 150ms ease-out',
-            }}
-          >
+          <div className="absolute inset-0 translate-x-full flex items-center justify-center">
             {renderCarouselSlide(nextItem)}
           </div>
         </div>
@@ -283,6 +275,46 @@ export default function MediaLightbox({ items, index, onClose, onNavigate, edgeP
             </div>
           )}
         </div>
+      )}
+
+      {/* Dimmed edge peeks — visual cue that there's more to see, pinned to
+          the true viewport edge (see EDGE_PEEK_WIDTH comment for why it's a
+          fixed cropped strip rather than a slice of the real slide). Bound to
+          the live drag offset so it shifts with an active swipe instead of
+          sitting static; rendered last so paint order is never in question. */}
+      {edgePeek && canSlide && !zoomed && (
+        <>
+          {prevItem?.mediaType?.startsWith('image/') && (
+            <div className={`absolute inset-y-0 left-0 ${EDGE_PEEK_WIDTH} overflow-hidden pointer-events-none`}>
+              <img
+                src={prevItem.url}
+                alt=""
+                draggable={false}
+                className="absolute inset-y-0 left-0 h-full w-screen object-cover object-left"
+                style={{
+                  filter: `brightness(${EDGE_PEEK_DIM})`,
+                  transform: `translateX(${dragX}px)`,
+                  transition: trackTransition,
+                }}
+              />
+            </div>
+          )}
+          {nextItem?.mediaType?.startsWith('image/') && (
+            <div className={`absolute inset-y-0 right-0 ${EDGE_PEEK_WIDTH} overflow-hidden pointer-events-none`}>
+              <img
+                src={nextItem.url}
+                alt=""
+                draggable={false}
+                className="absolute inset-y-0 right-0 h-full w-screen object-cover object-right"
+                style={{
+                  filter: `brightness(${EDGE_PEEK_DIM})`,
+                  transform: `translateX(${dragX}px)`,
+                  transition: trackTransition,
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   )
