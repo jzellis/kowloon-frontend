@@ -7,9 +7,10 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import ReactButton from '../components/posts/ReactButton'
 import { ShareButton } from '../components/posts/PostToolbar'
+import UserAvatar from '../components/ui/UserAvatar'
 import sizedUrl from '../lib/sizedUrl'
 
-export default function PhotoCard({ post, attachment, onOpen }) {
+export default function PhotoCard({ post, attachment, photoCount = 1, onOpen }) {
   const { t } = useTranslation()
   const { user } = useSelector((state) => state.auth)
 
@@ -29,14 +30,28 @@ export default function PhotoCard({ post, attachment, onOpen }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen?.() } }}
       aria-label={title || t('pics.openPhoto', { defaultValue: 'Open photo' })}
     >
-      {/* Bottom tinted overlay — author/title (left) + react/share (right), white on a dark scrim */}
+      {/* Bottom tinted overlay — avatar + name/id/title (left) + react/share (right), white on a dark scrim */}
       <div
-        className="absolute inset-x-0 bottom-0 px-2.5 py-2 flex items-end justify-between gap-2"
+        className="absolute inset-x-0 bottom-0 px-2.5 py-2 flex items-center justify-between gap-2"
         style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0) 80%)' }}
       >
-        <div className="min-w-0 flex flex-col leading-tight">
-          <span className="font-ui text-[11px] font-medium text-white truncate">{authorName}</span>
-          {title && <span className="font-ui text-[10px] text-white/75 truncate">{title}</span>}
+        {/* Photo-count badge — sits directly above this bar, on the image itself */}
+        {photoCount > 1 && (
+          <span
+            className="absolute right-2 bottom-full mb-1.5 w-5 h-5 rounded-full bg-black/60 text-white font-ui text-[10px] font-medium flex items-center justify-center"
+            style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.3)' }}
+          >
+            {photoCount}
+          </span>
+        )}
+
+        <div className="min-w-0 flex items-center gap-2">
+          <UserAvatar user={author} size="sm" />
+          <div className="min-w-0 flex flex-col leading-tight">
+            <span className="font-ui text-[11px] font-medium text-white truncate">{authorName}</span>
+            <span className="font-ui text-[10px] text-white/75 truncate">{authorHandle}</span>
+            {title && <span className="font-ui text-[10px] text-white/75 truncate">{title}</span>}
+          </div>
         </div>
         <div
           className="flex items-center gap-2.5 shrink-0 [&_button]:text-white [&_button:hover]:text-white/70 [&_svg]:drop-shadow-sm"

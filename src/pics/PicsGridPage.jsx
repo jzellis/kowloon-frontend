@@ -87,14 +87,15 @@ export default function PicsGridPage() {
 
   const { items, hasMore, loading, loadingMore, error, loadMore } = useFeed(fetchFn)
 
-  // Flatten posts -> one grid tile per photo, keeping post-grouping (postIndex)
-  // for the lightbox's up/down (next/previous post) navigation.
+  // One grid tile per POST (not per photo) — shows just the post's first
+  // photo; PhotoCard renders a count badge when there's more than one.
+  // Lightbox navigation still opens at photoIndex 0 and can browse the
+  // post's full attachments[] from there via its own left/right nav.
   const tiles = useMemo(() => {
     const out = []
     items.forEach((post, postIndex) => {
-      (post.attachments ?? []).forEach((attachment, photoIndex) => {
-        out.push({ post, postIndex, photoIndex, attachment, key: `${post.id}:${photoIndex}` })
-      })
+      const attachment = post.attachments?.[0]
+      if (attachment) out.push({ post, postIndex, attachment, photoCount: post.attachments.length, key: post.id })
     })
     return out
   }, [items])
@@ -136,7 +137,8 @@ export default function PicsGridPage() {
               key={tile.key}
               post={tile.post}
               attachment={tile.attachment}
-              onOpen={() => setActive({ postIndex: tile.postIndex, photoIndex: tile.photoIndex })}
+              photoCount={tile.photoCount}
+              onOpen={() => setActive({ postIndex: tile.postIndex, photoIndex: 0 })}
             />
           ))}
         </div>
