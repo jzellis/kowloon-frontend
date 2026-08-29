@@ -738,7 +738,9 @@ export default function PostComposer({
         ...prev,
         ...ok.map((f) => ({
           file: f,
-          title: f.name.replace(/\.[^.]+$/, ''),
+          // Deliberately not pre-filled from the filename — nobody wants
+          // "IMG_4213" as their caption, and it reads as a UI mistake.
+          title: '',
           alt: '',
           previewUrl: URL.createObjectURL(f),
         })),
@@ -813,7 +815,7 @@ export default function PostComposer({
               file: att.file,
               filename: att.file.name,
               contentType: att.file.type,
-              title: att.title || att.file.name,
+              title: att.title || undefined,
               summary: att.alt || undefined,
               to: audience,
             })

@@ -153,6 +153,30 @@ export function ShareButton({ post, t, user }) {
   )
 }
 
+// ── ReplyButton ──────────────────────────────────────────────────────────────
+// Extracted so standalone surfaces (the pics grid card) can drop in the same
+// reply icon without pulling in the rest of the toolbar. `onClick` decides
+// what "reply" means for the caller — PostToolbar opens ReplyModal inline by
+// default, but a caller can override it (e.g. jump to the real post page).
+
+export function ReplyButton({ post, t, onClick, replyCount = 0 }) {
+  if (!post?.id) return null
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={t('post.reply', { defaultValue: 'Reply' })}
+      aria-label={t('post.reply', { defaultValue: 'Reply' })}
+      className="inline-flex items-center gap-1.5 text-base text-base-content/50 hover:text-base-content transition-colors"
+    >
+      <FontAwesomeIcon icon={faComment} />
+      {replyCount > 0 && (
+        <span className="font-ui text-xs tracking-wider">{replyCount}</span>
+      )}
+    </button>
+  )
+}
+
 // ── Post text extraction (for Copy text) ─────────────────────────────────────
 
 // Prefer the Markdown source; fall back to stripping the rendered HTML. Mirrors
@@ -414,20 +438,12 @@ export default function PostToolbar({ post, onDeleted, onReplyClick }) {
       <div className="flex items-center ml-auto">
         <div className="flex items-center gap-4">
         {/* Reply */}
-        {post?.id && (
-          <button
-            type="button"
-            onClick={() => (onReplyClick ? onReplyClick() : setReplyOpen(true))}
-            title={t('post.reply', { defaultValue: 'Reply' })}
-            aria-label={t('post.reply', { defaultValue: 'Reply' })}
-            className="inline-flex items-center gap-1.5 text-base text-base-content/50 hover:text-base-content transition-colors"
-          >
-            <FontAwesomeIcon icon={faComment} />
-            {displayedReplyCount > 0 && (
-              <span className="font-ui text-xs tracking-wider">{displayedReplyCount}</span>
-            )}
-          </button>
-        )}
+        <ReplyButton
+          post={post}
+          t={t}
+          replyCount={displayedReplyCount}
+          onClick={() => (onReplyClick ? onReplyClick() : setReplyOpen(true))}
+        />
         {post?.id && !onReplyClick && (
           <ReplyModal
             post={post}

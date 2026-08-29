@@ -6,7 +6,8 @@
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import ReactButton from '../components/posts/ReactButton'
-import { ShareButton } from '../components/posts/PostToolbar'
+import { ShareButton, ReplyButton } from '../components/posts/PostToolbar'
+import PostReacts from '../components/posts/PostReacts'
 import UserAvatar from '../components/ui/UserAvatar'
 import sizedUrl from '../lib/sizedUrl'
 
@@ -17,8 +18,16 @@ export default function PhotoCard({ post, attachment, photoCount = 1, onOpen }) 
   const author = post?.actor
   const authorName = author?.name ?? author?.id ?? post?.actorId
   const authorHandle = author?.id ?? post?.actorId
-  const title = attachment?.name || attachment?.alt || post?.title || post?.name || ''
+  // A multi-photo post doesn't have one "the" image title — the post's own
+  // title/summary describes the whole set better than a single attachment's
+  // (possibly blank) caption. Single-photo posts still prefer the photo's
+  // own caption when it has one.
+  const isMultiPhoto = photoCount > 1
+  const title = isMultiPhoto
+    ? (post?.title || post?.summary || '')
+    : (attachment?.name || attachment?.alt || post?.title || post?.name || '')
   const bgUrl = sizedUrl(attachment?.url, 600)
+  const mainDomain = window.location.hostname.replace(/^pics\./, '')
 
   return (
     <div
@@ -54,9 +63,17 @@ export default function PhotoCard({ post, attachment, photoCount = 1, onOpen }) 
           </div>
         </div>
         <div
-          className="flex items-center gap-2.5 shrink-0 [&_button]:text-white [&_button:hover]:text-white/70 [&_svg]:drop-shadow-sm"
+          className="flex items-center gap-2.5 shrink-0 [&_button]:text-white [&_button:hover]:text-white/70 [&_svg]:drop-shadow-sm [&_span]:text-white/90"
           onClick={(e) => e.stopPropagation()}
         >
+          <PostReacts post={post} />
+          <ReplyButton
+            post={post}
+            t={t}
+            onClick={() => {
+              window.location.href = `${window.location.protocol}//${mainDomain}/posts/${encodeURIComponent(post.id)}`
+            }}
+          />
           {user && post?.canReact !== 'none' && <ReactButton post={post} t={t} />}
           <ShareButton post={post} t={t} user={user} />
         </div>

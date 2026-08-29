@@ -2,7 +2,21 @@ import { useEffect, useState, useRef } from 'react'
 import { Play, Music, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import AudioPlayer from './AudioPlayer'
 
-export default function MediaLightbox({ items, index, onClose, onNavigate }) {
+// Caption bar for the currently-shown image — translucent black bg, bottom of
+// the frame. Renders nothing when the attachment has no title (most don't).
+function ImageCaption({ item }) {
+  if (!item?.name) return null
+  return (
+    <div
+      className="absolute inset-x-0 bottom-0 px-4 py-2.5 pointer-events-none"
+      style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0) 100%)' }}
+    >
+      <span className="font-ui text-sm text-white/90 drop-shadow-sm">{item.name}</span>
+    </div>
+  )
+}
+
+export default function MediaLightbox({ items, index, onClose, onNavigate, edgePeek = false }) {
   const item = items[index]
   const mt = item?.mediaType ?? ''
   const touchStart = useRef(null)
@@ -184,6 +198,37 @@ export default function MediaLightbox({ items, index, onClose, onNavigate }) {
         </>
       )}
 
+      {/* Dimmed edge peeks — static visual cue that there are more photos in
+          this post, even at rest (the drag-track slides below only reveal
+          neighbours mid-swipe). Only shown for image neighbours; a video/audio
+          neighbour just gets no peek rather than a broken thumbnail. */}
+      {edgePeek && canSlide && !zoomed && (
+        <>
+          {prevItem?.mediaType?.startsWith('image/') && (
+            <div className="absolute inset-y-0 left-0 w-8 sm:w-12 overflow-hidden pointer-events-none z-0">
+              <img
+                src={prevItem.url}
+                alt=""
+                draggable={false}
+                className="absolute inset-y-0 left-0 h-full w-screen object-cover object-left"
+                style={{ filter: 'brightness(0.35)' }}
+              />
+            </div>
+          )}
+          {nextItem?.mediaType?.startsWith('image/') && (
+            <div className="absolute inset-y-0 right-0 w-8 sm:w-12 overflow-hidden pointer-events-none z-0">
+              <img
+                src={nextItem.url}
+                alt=""
+                draggable={false}
+                className="absolute inset-y-0 right-0 h-full w-screen object-cover object-right"
+                style={{ filter: 'brightness(0.35)' }}
+              />
+            </div>
+          )}
+        </>
+      )}
+
       {zoomed && isImage ? (
         // Zoomed view — image at 200% width inside a native scroll container.
         // Native two-finger pinch + pan handle further zoom and movement;
@@ -219,13 +264,14 @@ export default function MediaLightbox({ items, index, onClose, onNavigate }) {
             onClick={(e) => { e.stopPropagation(); setZoomed(true) }}
           >
             {renderImage(item)}
+            <ImageCaption item={item} />
           </div>
           <div className="absolute inset-0 translate-x-full flex items-center justify-center">
             {renderCarouselSlide(nextItem)}
           </div>
         </div>
       ) : (
-        <div onClick={(e) => e.stopPropagation()} className="max-w-[95vw] max-h-[95vh] flex items-center justify-center">
+        <div onClick={(e) => e.stopPropagation()} className="relative max-w-[95vw] max-h-[95vh] flex items-center justify-center">
           {isImage && (
             <img
               src={item.url}
@@ -235,6 +281,7 @@ export default function MediaLightbox({ items, index, onClose, onNavigate }) {
               className="max-w-[95vw] max-h-[95vh] object-contain cursor-zoom-in select-none"
             />
           )}
+          {isImage && <ImageCaption item={item} />}
           {mt.startsWith('video/') && (
             <video controls autoPlay playsInline className="max-w-[95vw] max-h-[95vh] object-contain bg-black">
               <source src={item.url} type={mt} />

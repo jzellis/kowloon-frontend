@@ -144,7 +144,7 @@ export default function PicsLightbox({ posts, activePostIndex, activePhotoIndex,
           transition={POST_TRANSITION}
           className="absolute inset-0"
         >
-          <MediaLightbox items={attachments} index={activePhotoIndex} onClose={onClose} onNavigate={onNavigatePhoto} />
+          <MediaLightbox items={attachments} index={activePhotoIndex} onClose={onClose} onNavigate={onNavigatePhoto} edgePeek />
 
           {/* Info panel — fixed sibling layered above MediaLightbox's full-bleed image. */}
           <div className="fixed inset-x-0 bottom-0 z-[110] max-h-[45vh] overflow-y-auto bg-base-100 text-base-content border-t-2 border-base-300 px-4 py-4 flex flex-col gap-3">
