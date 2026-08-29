@@ -2,6 +2,13 @@ import { useEffect, useState, useRef } from 'react'
 import { Play, Music, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import AudioPlayer from './AudioPlayer'
 
+// How much of the neighbouring photo peeks in at the screen edge at rest,
+// when edgePeek is on. Applied as a static offset on the SAME carousel-track
+// slides the drag gesture already animates (not separate elements), so the
+// peek naturally tracks the swipe/click and matches the main image's own
+// object-contain scale exactly instead of a separately-scaled crop.
+const EDGE_PEEK_PX = 16
+
 // Caption bar for the currently-shown image — translucent black bg, bottom of
 // the frame. Renders nothing when the attachment has no title (most don't).
 function ImageCaption({ item }) {
@@ -198,37 +205,6 @@ export default function MediaLightbox({ items, index, onClose, onNavigate, edgeP
         </>
       )}
 
-      {/* Dimmed edge peeks — static visual cue that there are more photos in
-          this post, even at rest (the drag-track slides below only reveal
-          neighbours mid-swipe). Only shown for image neighbours; a video/audio
-          neighbour just gets no peek rather than a broken thumbnail. */}
-      {edgePeek && canSlide && !zoomed && (
-        <>
-          {prevItem?.mediaType?.startsWith('image/') && (
-            <div className="absolute inset-y-0 left-0 w-8 sm:w-12 overflow-hidden pointer-events-none z-0">
-              <img
-                src={prevItem.url}
-                alt=""
-                draggable={false}
-                className="absolute inset-y-0 left-0 h-full w-screen object-cover object-left"
-                style={{ filter: 'brightness(0.35)' }}
-              />
-            </div>
-          )}
-          {nextItem?.mediaType?.startsWith('image/') && (
-            <div className="absolute inset-y-0 right-0 w-8 sm:w-12 overflow-hidden pointer-events-none z-0">
-              <img
-                src={nextItem.url}
-                alt=""
-                draggable={false}
-                className="absolute inset-y-0 right-0 h-full w-screen object-cover object-right"
-                style={{ filter: 'brightness(0.35)' }}
-              />
-            </div>
-          )}
-        </>
-      )}
-
       {zoomed && isImage ? (
         // Zoomed view — image at 200% width inside a native scroll container.
         // Native two-finger pinch + pan handle further zoom and movement;
@@ -256,7 +232,14 @@ export default function MediaLightbox({ items, index, onClose, onNavigate, edgeP
             transition: trackTransition,
           }}
         >
-          <div className="absolute inset-0 -translate-x-full flex items-center justify-center">
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              transform: `translateX(calc(-100% + ${edgePeek ? EDGE_PEEK_PX : 0}px))`,
+              filter: edgePeek && !dragging ? 'brightness(0.4)' : 'none',
+              transition: 'filter 150ms ease-out',
+            }}
+          >
             {renderCarouselSlide(prevItem)}
           </div>
           <div
@@ -266,7 +249,14 @@ export default function MediaLightbox({ items, index, onClose, onNavigate, edgeP
             {renderImage(item)}
             <ImageCaption item={item} />
           </div>
-          <div className="absolute inset-0 translate-x-full flex items-center justify-center">
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              transform: `translateX(calc(100% - ${edgePeek ? EDGE_PEEK_PX : 0}px))`,
+              filter: edgePeek && !dragging ? 'brightness(0.4)' : 'none',
+              transition: 'filter 150ms ease-out',
+            }}
+          >
             {renderCarouselSlide(nextItem)}
           </div>
         </div>
