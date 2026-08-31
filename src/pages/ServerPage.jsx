@@ -17,7 +17,7 @@ import ErrorState from '../components/ui/ErrorState'
 import EmptyState from '../components/ui/EmptyState'
 import Modal from '../components/ui/Modal'
 import PostCard from '../components/posts/PostCard'
-import RecShelf from '../components/discover/RecShelf'
+import DiscoveryShelf from '../components/discover/DiscoveryShelf'
 import DiscoverMediaTile from '../components/discover/DiscoverMediaTile'
 import ServerMoreMenu from '../components/servers/ServerMoreMenu'
 import sizedUrl from '../lib/sizedUrl'
@@ -283,7 +283,7 @@ export default function ServerPage() {
     try {
       const controller = new AbortController()
       const timer = setTimeout(() => controller.abort(), 15000)
-      const res = await fetch(`${remoteBase}/recommendations`, {
+      const res = await fetch(`${remoteBase}/discovery`, {
         headers: { Accept: 'application/json' },
         signal: controller.signal,
       }).finally(() => clearTimeout(timer))
@@ -520,7 +520,7 @@ export default function ServerPage() {
                 </div>
               ) : (
                 <div className="flex flex-col">
-                  {recSections.map((s) => <RecShelf key={s.id} section={s} baseUrl={remoteBase} onDark />)}
+                  {recSections.map((s) => <DiscoveryShelf key={s.id} section={s} baseUrl={remoteBase} onDark />)}
                 </div>
               )}
             </div>

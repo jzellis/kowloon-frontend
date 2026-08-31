@@ -1,9 +1,9 @@
 // FeedDiscoverRow — a single horizontally-scrolling row of square cards pulled
-// from the same curated pool as the Discover page (GET /recommendations). Shown
+// from the same curated pool as the Discover page (GET /discovery). Shown
 // at the top of the Community Posts feed only. Mixed content: Posts (media +
 // text), Circles, Groups, Pages, Bookmarks, Servers — one uniform square each.
 //
-// Prototype: flattens every recommendation section into one deduped, capped row.
+// Prototype: flattens every discovery section into one deduped, capped row.
 
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -131,7 +131,7 @@ export default function FeedDiscoverRow({ refreshKey = 0 }) {
   useEffect(() => {
     if (!client) return
     let cancelled = false
-    client.feeds.getRecommendations()
+    client.feeds.getDiscovery()
       .then((res) => {
         if (cancelled) return
         const seen = new Set()

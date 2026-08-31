@@ -1,5 +1,5 @@
-// RecCard — one Discover recommendation, dispatched by refType. Web counterpart
-// of the mobile RecCard.
+// DiscoveryCard — one Discover item, dispatched by refType. Web counterpart
+// of the mobile DiscoveryCard.
 //   Post          : featured-image card with author + title overlay (text fallback)
 //   Circle        : icon + name + blurb, with View / Save (copy) actions
 //   Group         : icon + name + blurb, with View / Posts actions
@@ -207,7 +207,7 @@ function ServerCard({ item, baseUrl, onDark }) {
   )
 }
 
-export default function RecCard({ item, baseUrl, onDark }) {
+export default function DiscoveryCard({ item, baseUrl, onDark }) {
   const meta = onDark ? 'text-white/50' : 'text-base-content/50'
   switch (item.refType) {
     case 'Post':

@@ -1,6 +1,6 @@
 // DiscoverPage — the server's curated shelves plus people search, over a
 // blurred, darkened version of the server hero image (the `background` baked
-// into GET /recommendations; Klein-blue fallback when a server has no hero).
+// into GET /discovery; Klein-blue fallback when a server has no hero).
 // Featured content sits in translucent-black panels with white text — mirrors
 // the mobile Discover screen. First stop after registration; also linked in nav.
 
@@ -13,7 +13,7 @@ import { useClient } from '../hooks/useClient'
 import { toast } from '../app/toast'
 import CircleIcon from '../components/ui/CircleIcon'
 import CopyCircleMenu from '../components/circles/CopyCircleMenu'
-import RecShelf from '../components/discover/RecShelf'
+import DiscoveryShelf from '../components/discover/DiscoveryShelf'
 import EmptyState from '../components/ui/EmptyState'
 import sizedUrl from '../lib/sizedUrl'
 
@@ -198,12 +198,12 @@ export default function DiscoverPage() {
     localStorage.setItem(BANNER_KEY, '0')
   }
 
-  // Load the server's curated recommendation shelves + blurred-hero background.
+  // Load the server's curated Discover shelves + blurred-hero background.
   useEffect(() => {
     if (!client) return
     setRecsLoading(true)
     client.feeds
-      .getRecommendations()
+      .getDiscovery()
       .then((res) => {
         setSections(res?.sections ?? [])
         setBackground(res?.background ?? null)
@@ -318,13 +318,13 @@ export default function DiscoverPage() {
           </div>
         )}
 
-        {/* Curated shelves (server recommendations); fall back to popular circles. */}
+        {/* Curated shelves (server Discover items); fall back to popular circles. */}
         {!showUserResults && (
           recsLoading ? (
             <div className="py-16 flex justify-center"><span className="loading loading-spinner loading-lg text-white/70" /></div>
           ) : sections.length > 0 ? (
             <div className="flex flex-col">
-              {sections.map((s) => <RecShelf key={s.id} section={s} baseUrl={baseUrl} onDark />)}
+              {sections.map((s) => <DiscoveryShelf key={s.id} section={s} baseUrl={baseUrl} onDark />)}
             </div>
           ) : (
             <div className="bg-black/45 px-4 py-4">

@@ -3,7 +3,7 @@
 //   image : thumbnail that links to its post (/posts/:id)
 //   video : click opens fullscreen playback in a modal (<video controls autoPlay>)
 //   audio : plays inline via the styled AudioPlayer tile
-// `mediaKind` + `mediaUrl` + `mediaImage` come from GET /recommendations.
+// `mediaKind` + `mediaUrl` + `mediaImage` come from GET /discovery.
 // `baseUrl` resolves relative URLs when the tile shows a remote server's media.
 
 import { useState } from 'react'

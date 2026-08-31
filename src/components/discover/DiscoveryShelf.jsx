@@ -1,14 +1,14 @@
-// RecShelf — one Discover shelf: a section title/blurb over a horizontally
-// scrolling row of RecCards. Web counterpart of the mobile RecShelf.
+// DiscoveryShelf — one Discover shelf: a section title/blurb over a horizontally
+// scrolling row of DiscoveryCards. Web counterpart of the mobile DiscoveryShelf.
 //
 // `onDark` renders the shelf as a translucent-black panel with white text, for
 // the Discover screen's blurred-hero background.
 // A `contentType === 'media'` section renders DiscoverMediaTiles instead of cards.
 
-import RecCard from './RecCard'
+import DiscoveryCard from './DiscoveryCard'
 import DiscoverMediaTile from './DiscoverMediaTile'
 
-export default function RecShelf({ section, baseUrl, onDark }) {
+export default function DiscoveryShelf({ section, baseUrl, onDark }) {
   if (!section?.items?.length) return null
   const isMedia = section.contentType === 'media'
 
@@ -36,7 +36,7 @@ export default function RecShelf({ section, baseUrl, onDark }) {
               showAuthor
             />
           ) : (
-            <RecCard key={`${item.id}:${i}`} item={item} baseUrl={baseUrl} onDark={onDark} />
+            <DiscoveryCard key={`${item.id}:${i}`} item={item} baseUrl={baseUrl} onDark={onDark} />
           )
         )}
       </div>
