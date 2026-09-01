@@ -19,6 +19,21 @@ import sizedUrl from '../../lib/sizedUrl'
 const CARD_W = 'w-60'   // 240px — circles/groups/links/servers
 const POST_W = 'w-72'   // 288px — posts
 
+// Editorial-commentary strip under a Post card. Always the same height,
+// whether or not there's a note, so cards in the same shelf stay level
+// regardless of which posts happen to be curated.
+const NOTE_BLOCK_HEIGHT = 64
+
+function NoteBlock({ note }) {
+  return (
+    <div className="bg-black px-3 py-2.5 flex items-center" style={{ minHeight: NOTE_BLOCK_HEIGHT }}>
+      {note && (
+        <p className="font-ui text-xs text-white/80 leading-relaxed line-clamp-3">{note}</p>
+      )}
+    </div>
+  )
+}
+
 const hexMask = {
   WebkitMaskImage: 'url(/hex-mask.svg)',
   maskImage: 'url(/hex-mask.svg)',
@@ -64,35 +79,41 @@ function PostCard({ item, baseUrl, onDark }) {
   const text = item.title || item.summary || item.preview || ''
   if (img) {
     return (
-      <Link to={`/posts/${encodeURIComponent(item.id)}`} className={`${POST_W} shrink-0 relative block bg-base-300 overflow-hidden`}>
-        <img src={sizedUrl(img, 600)} alt="" className="w-full object-cover" style={{ height: 168 }} />
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-3">
-          <p className="font-ui text-sm font-bold text-white leading-snug line-clamp-2">{text}</p>
-          <div className="flex items-center gap-2 mt-2">
-            {authorIcon
-              ? <img src={sizedUrl(authorIcon, 100)} alt="" className="w-5 h-5 rounded-full object-cover" />
-              : <div className="w-5 h-5 rounded-full bg-white/30" />}
-            <span className="font-ui text-[11px] text-white/90 truncate">{author.name || author.id}</span>
+      <Link to={`/posts/${encodeURIComponent(item.id)}`} className={`${POST_W} shrink-0 block bg-base-300 overflow-hidden`}>
+        <div className="relative" style={{ height: 168 }}>
+          <img src={sizedUrl(img, 600)} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-3">
+            <p className="font-ui text-sm font-bold text-white leading-snug line-clamp-2">{text}</p>
+            <div className="flex items-center gap-2 mt-2">
+              {authorIcon
+                ? <img src={sizedUrl(authorIcon, 100)} alt="" className="w-5 h-5 rounded-full object-cover" />
+                : <div className="w-5 h-5 rounded-full bg-white/30" />}
+              <span className="font-ui text-[11px] text-white/90 truncate">{author.name || author.id}</span>
+            </div>
           </div>
         </div>
+        <NoteBlock note={item.note} />
       </Link>
     )
   }
   const t = tokens(onDark)
   return (
-    <Link to={`/posts/${encodeURIComponent(item.id)}`} className={`${CARD_W} shrink-0 block p-3 ${onDark ? 'bg-black/40' : 'bg-base-200'}`}>
-      <div className="flex items-center gap-1.5 mb-2">
-        <Newspaper size={12} className={t.meta} />
-        <span className={`font-ui uppercase tracking-widest text-[9px] ${t.meta}`}>{item.type || 'Post'}</span>
+    <Link to={`/posts/${encodeURIComponent(item.id)}`} className={`${CARD_W} shrink-0 block ${onDark ? 'bg-black/40' : 'bg-base-200'}`}>
+      <div className="p-3">
+        <div className="flex items-center gap-1.5 mb-2">
+          <Newspaper size={12} className={t.meta} />
+          <span className={`font-ui uppercase tracking-widest text-[9px] ${t.meta}`}>{item.type || 'Post'}</span>
+        </div>
+        <p className={`font-ui text-sm font-bold leading-snug line-clamp-4 ${t.title}`}>{text}</p>
+        <div className="flex items-center gap-2 mt-3">
+          {authorIcon
+            ? <img src={sizedUrl(authorIcon, 100)} alt="" className="w-5 h-5 rounded-full object-cover" />
+            : <div className={`w-5 h-5 rounded-full ${onDark ? 'bg-white/20' : 'bg-base-300'}`} />}
+          <span className={`font-ui text-[11px] truncate ${t.blurb}`}>{author.name || author.id}</span>
+        </div>
       </div>
-      <p className={`font-ui text-sm font-bold leading-snug line-clamp-4 ${t.title}`}>{text}</p>
-      <div className="flex items-center gap-2 mt-3">
-        {authorIcon
-          ? <img src={sizedUrl(authorIcon, 100)} alt="" className="w-5 h-5 rounded-full object-cover" />
-          : <div className={`w-5 h-5 rounded-full ${onDark ? 'bg-white/20' : 'bg-base-300'}`} />}
-        <span className={`font-ui text-[11px] truncate ${t.blurb}`}>{author.name || author.id}</span>
-      </div>
+      <NoteBlock note={item.note} />
     </Link>
   )
 }
