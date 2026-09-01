@@ -11,12 +11,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faComment, faBookmark, faShareNodes } from '@fortawesome/free-solid-svg-icons'
 import {
   MoreHorizontal, Flag, Ban, BellOff, Link as LinkIcon,
-  Copy, ExternalLink, Pencil, Trash2,
+  Copy, ExternalLink, Pencil, Trash2, Compass,
 } from 'lucide-react'
 import PostComposer from './PostComposer'
 import ReactButton from './ReactButton'
 import ReplyModal from './ReplyModal'
 import BookmarkComposer from '../bookmarks/BookmarkComposer'
+import AddToDiscoveryModal from '../discover/AddToDiscoveryModal'
 import { useClient } from '../../hooks/useClient'
 import { toast } from '../../app/toast'
 
@@ -218,6 +219,7 @@ function PostMoreMenu({ post, t, user, onDeleted }) {
   const [open, setOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [anchorRect, setAnchorRect] = useState(null)
+  const [discoveryOpen, setDiscoveryOpen] = useState(false)
 
   const triggerRef = useRef(null)
   const popoverRef = useRef(null)
@@ -226,6 +228,7 @@ function PostMoreMenu({ post, t, user, onDeleted }) {
   const isOwner = !!user?.id && !!authorId && user.id === authorId
   const isSelf = isOwner
   const canReport = !!user
+  const isAdmin = !!user?.isServerAdmin
 
   const localUrl = post?.id
     ? `${window.location.origin}/posts/${encodeURIComponent(post.id)}`
@@ -362,6 +365,16 @@ function PostMoreMenu({ post, t, user, onDeleted }) {
     items.push({ key: 'browser', Icon: ExternalLink, label: t('post.openInBrowser', { defaultValue: 'Open in browser' }), onClick: handleOpenBrowser })
   }
 
+  if (isAdmin && post?.id) {
+    items.push({ key: 'sepdiscover', sep: true })
+    items.push({
+      key: 'discover',
+      Icon: Compass,
+      label: t('discovery.addTitle', { defaultValue: 'Add to Discovery' }),
+      onClick: () => { setOpen(false); setDiscoveryOpen(true) },
+    })
+  }
+
   // Nothing actionable — don't render the trigger.
   if (!items.some((i) => !i.sep)) return null
 
@@ -409,6 +422,15 @@ function PostMoreMenu({ post, t, user, onDeleted }) {
           )}
         </div>,
         document.body,
+      )}
+
+      {isAdmin && (
+        <AddToDiscoveryModal
+          item={post}
+          refType="Post"
+          open={discoveryOpen}
+          onClose={() => setDiscoveryOpen(false)}
+        />
       )}
     </>
   )

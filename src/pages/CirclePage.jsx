@@ -6,11 +6,12 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setView } from '../app/feedSlice'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Share2, Heart, Pencil, Trash2, X, Check, UserPlus, UserMinus, Loader } from 'lucide-react'
+import { Share2, Heart, Pencil, Trash2, X, Check, UserPlus, UserMinus, Loader, Compass } from 'lucide-react'
 import { useClient } from '../hooks/useClient'
 import UserAvatar from '../components/ui/UserAvatar'
 import CircleIcon from '../components/ui/CircleIcon'
 import CopyCircleMenu from '../components/circles/CopyCircleMenu'
+import AddToDiscoveryModal from '../components/discover/AddToDiscoveryModal'
 import Spinner from '../components/ui/Spinner'
 import ErrorState from '../components/ui/ErrorState'
 import Modal from '../components/ui/Modal'
@@ -197,6 +198,7 @@ export default function CirclePage() {
   const [removingId, setRemovingId] = useState(null)
   const [confirmUnblock, setConfirmUnblock] = useState(null) // member pending unblock confirmation
   const [sharing, setSharing] = useState(false)
+  const [discoveryOpen, setDiscoveryOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [reacted, setReacted] = useState(false)
   const [reactCount, setReactCount] = useState(0)
@@ -536,6 +538,14 @@ export default function CirclePage() {
                     {reactCount > 0 ? reactCount : t('circle.heart', { defaultValue: 'Heart' })}
                   </button>
                 )}
+                {authUser?.isServerAdmin && (
+                  <button
+                    onClick={() => setDiscoveryOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-base-300 font-ui text-xs uppercase tracking-widest text-base-content/60 hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <Compass size={12} /> {t('discovery.addTitle', { defaultValue: 'Add to Discovery' })}
+                  </button>
+                )}
                 {isOwner && (
                   <>
                     <button
@@ -664,6 +674,15 @@ export default function CirclePage() {
             </button>
           </div>
         </Modal>
+      )}
+
+      {authUser?.isServerAdmin && (
+        <AddToDiscoveryModal
+          item={circle}
+          refType="Circle"
+          open={discoveryOpen}
+          onClose={() => setDiscoveryOpen(false)}
+        />
       )}
 
     </div>

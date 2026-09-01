@@ -5,7 +5,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, ExternalLink, Users, UserPlus, UserCheck, Pencil, Trash2, ChevronDown, ChevronUp, Inbox, Share2, Copy, Check } from 'lucide-react'
+import { MapPin, ExternalLink, Users, UserPlus, UserCheck, Pencil, Trash2, ChevronDown, ChevronUp, Inbox, Share2, Copy, Check, Compass } from 'lucide-react'
 import { useClient } from '../hooks/useClient'
 import { joinNeedsApproval, canJoinGroup, rsvpPolicyLabel } from '../lib/groups'
 import { useFeed } from '../hooks/useFeed'
@@ -16,6 +16,7 @@ import ComposeFab from '../components/posts/ComposeFab'
 import CircleIcon from '../components/ui/CircleIcon'
 import Spinner from '../components/ui/Spinner'
 import ErrorState from '../components/ui/ErrorState'
+import AddToDiscoveryModal from '../components/discover/AddToDiscoveryModal'
 import sizedUrl from '../lib/sizedUrl'
 
 const hexMask = {
@@ -45,6 +46,7 @@ export default function GroupPage() {
   const [showAllMembers, setShowAllMembers] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const [sharing, setSharing] = useState(false)
+  const [discoveryOpen, setDiscoveryOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [composerOpen, setComposerOpen] = useState(false)
   const [composerType, setComposerType] = useState('Note')
@@ -294,6 +296,14 @@ export default function GroupPage() {
                 {t('group.inviteOnly', { defaultValue: 'Invite only' })}
               </span>
             )}
+            {authUser?.isServerAdmin && (
+              <button
+                onClick={() => setDiscoveryOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-base-300 font-ui text-xs uppercase tracking-widest text-base-content/60 hover:border-primary hover:text-primary transition-colors"
+              >
+                <Compass size={12} /> {t('discovery.addTitle', { defaultValue: 'Add to Discovery' })}
+              </button>
+            )}
             {isOwner && (
               <>
                 <Link
@@ -416,6 +426,15 @@ export default function GroupPage() {
           onClose={() => setSharing(false)}
           onPostCreated={() => setSharing(false)}
           prompt={t('composer.shareGroupPrompt', { defaultValue: 'Share this group…' })}
+        />
+      )}
+
+      {authUser?.isServerAdmin && (
+        <AddToDiscoveryModal
+          item={group}
+          refType="Group"
+          open={discoveryOpen}
+          onClose={() => setDiscoveryOpen(false)}
         />
       )}
 
