@@ -7,20 +7,72 @@ import { useDispatch } from 'react-redux'
 import { fetchThemesAsync } from '../../features/theme/themeSlice'
 import Spinner from '../../components/ui/Spinner'
 
-// All DaisyUI v5 color token names (without --color- prefix)
-const COLOR_TOKENS = [
-  'base-100', 'base-200', 'base-300', 'base-content',
-  'primary', 'primary-content',
-  'secondary', 'secondary-content',
-  'accent', 'accent-content',
-  'neutral', 'neutral-content',
-  'info', 'info-content',
-  'success', 'success-content',
-  'warning', 'warning-content',
-  'error', 'error-content',
+// DaisyUI v5 color tokens, grouped and plain-language labeled for admins who
+// don't know CSS. The raw token name is still shown as a small hint underneath
+// each field for anyone who does want to cross-reference it against the CSS.
+const TOKEN_GROUPS = [
+  {
+    title: 'Backgrounds & Text',
+    tokens: [
+      { key: 'base-100', label: 'Page Background', hint: 'The main background behind all content' },
+      { key: 'base-200', label: 'Card Background', hint: 'Cards, panels, and hover states' },
+      { key: 'base-300', label: 'Borders & Dividers', hint: 'Lines between sections and around boxes' },
+      { key: 'base-content', label: 'Body Text', hint: 'The default text color' },
+    ],
+  },
+  {
+    title: 'Primary Color',
+    tokens: [
+      { key: 'primary', label: 'Primary Color', hint: 'Buttons, links, and highlights' },
+      { key: 'primary-content', label: 'Text on Primary', hint: 'Text and icons shown on the primary color' },
+    ],
+  },
+  {
+    title: 'Secondary Color',
+    tokens: [
+      { key: 'secondary', label: 'Secondary Color', hint: 'Sidebar and secondary buttons' },
+      { key: 'secondary-content', label: 'Text on Secondary', hint: 'Text and icons shown on the secondary color' },
+    ],
+  },
+  {
+    title: 'Accent Color',
+    tokens: [
+      { key: 'accent', label: 'Accent Color', hint: 'Extra highlights and decorative touches' },
+      { key: 'accent-content', label: 'Text on Accent', hint: 'Text and icons shown on the accent color' },
+    ],
+  },
+  {
+    title: 'Dark Surface',
+    tokens: [
+      { key: 'neutral', label: 'Dark Surface', hint: 'Dark menus and panels' },
+      { key: 'neutral-content', label: 'Text on Dark Surface', hint: 'Text and icons on dark panels' },
+    ],
+  },
+  {
+    title: 'Status Colors',
+    tokens: [
+      { key: 'info', label: 'Info Color', hint: 'Informational messages' },
+      { key: 'info-content', label: 'Text on Info', hint: '' },
+      { key: 'success', label: 'Success Color', hint: 'Confirmations and successful actions' },
+      { key: 'success-content', label: 'Text on Success', hint: '' },
+      { key: 'warning', label: 'Warning Color', hint: 'Warnings and caution messages' },
+      { key: 'warning-content', label: 'Text on Warning', hint: '' },
+      { key: 'error', label: 'Error Color', hint: 'Errors and destructive actions' },
+      { key: 'error-content', label: 'Text on Error', hint: '' },
+    ],
+  },
 ]
 
-const POST_COLOR_KEYS = ['note', 'article', 'media', 'link', 'event']
+const COLOR_TOKENS = TOKEN_GROUPS.flatMap((g) => g.tokens.map((t) => t.key))
+
+const POST_COLOR_FIELDS = [
+  { key: 'note', label: 'Note Posts' },
+  { key: 'article', label: 'Article Posts' },
+  { key: 'media', label: 'Media Posts' },
+  { key: 'link', label: 'Link Posts' },
+  { key: 'event', label: 'Event Posts' },
+]
+const POST_COLOR_KEYS = POST_COLOR_FIELDS.map((f) => f.key)
 
 const BLANK_COLORS = Object.fromEntries(COLOR_TOKENS.map((t) => [t, '']))
 const BLANK_POST_COLORS = Object.fromEntries(POST_COLOR_KEYS.map((k) => [k, '#888888']))
@@ -30,6 +82,12 @@ const BLANK_THEME = {
   colors: { ...BLANK_COLORS },
   postColors: { ...BLANK_POST_COLORS },
 }
+
+// <input type="color"> only accepts a plain #rrggbb value -- fall back to a
+// neutral gray when the stored value is an oklch(...) string (or anything
+// else it can't parse) so the picker still opens instead of silently no-oping.
+const HEX_RE = /^#[0-9a-f]{6}$/i
+const swatchValue = (v) => (HEX_RE.test(v) ? v : '#888888')
 
 // Small row of color swatches — visual fingerprint for a theme
 function ThemeSwatches({ theme }) {
@@ -48,42 +106,77 @@ function ThemeSwatches({ theme }) {
   )
 }
 
-// Color input: text field + live swatch preview
-function ColorInput({ label, value, onChange }) {
+// Color field: a native color-picker swatch (doubles as the "sample" and the
+// picker button) + a text field for exact values (hex or oklch). The
+// plain-language label leads; the raw CSS token name is a small mono hint.
+function ColorInput({ label, hint, token, value, onChange }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <label className="font-ui text-[10px] uppercase tracking-widest text-base-content/50">{label}</label>
-      <div className="flex items-center gap-1">
-        <span
-          style={{ background: value || 'transparent', width: 18, height: 18, flexShrink: 0, border: '1px solid rgba(0,0,0,.2)' }}
+    <div className="flex flex-col gap-1">
+      <div>
+        <label className="font-ui text-xs text-base-content/80">{label}</label>
+        {hint && <p className="font-reading text-[11px] text-base-content/40 italic">{hint}</p>}
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={swatchValue(value)}
+          onChange={(e) => onChange(e.target.value)}
+          title="Pick a color"
+          className="w-9 h-9 shrink-0 border border-base-300 p-0 cursor-pointer bg-transparent"
         />
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="oklch(…) or #hex"
-          className="flex-1 min-w-0 border border-base-300 focus:border-primary bg-base-100 px-2 py-1 font-mono text-[11px] outline-none"
+          placeholder="#hex or oklch(…)"
+          className="flex-1 min-w-0 border border-base-300 focus:border-primary bg-base-100 px-2 py-1.5 font-mono text-[11px] outline-none"
         />
       </div>
+      <span className="font-mono text-[10px] text-base-content/30">{token}</span>
     </div>
   )
 }
 
 // Create/Edit form
-function ThemeForm({ initial, onSave, onCancel }) {
-  const [form, setForm] = useState(() => ({
-    ...BLANK_THEME,
-    ...initial,
-    colors: { ...BLANK_COLORS, ...(initial?.colors ?? {}) },
-    postColors: { ...BLANK_POST_COLORS, ...(initial?.postColors ?? {}) },
-  }))
+function ThemeForm({ initial, presets, onSave, onCancel }) {
+  const isEdit = !!initial?.id
+  const lightPreset = presets?.light
+  const darkPreset = presets?.dark
+
+  const [form, setForm] = useState(() => {
+    if (initial) {
+      return {
+        ...BLANK_THEME,
+        ...initial,
+        colors: { ...BLANK_COLORS, ...(initial.colors ?? {}) },
+        postColors: { ...BLANK_POST_COLORS, ...(initial.postColors ?? {}) },
+      }
+    }
+    // New theme: start from the site's Light preset so the admin edits real,
+    // already-good colors instead of facing a wall of blank fields.
+    return {
+      ...BLANK_THEME,
+      colorScheme: 'light',
+      colors: { ...BLANK_COLORS, ...(lightPreset?.colors ?? {}) },
+      postColors: { ...BLANK_POST_COLORS, ...(lightPreset?.postColors ?? {}) },
+    }
+  })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
-  const isEdit = !!initial?.id
 
   const setColor = (key, val) =>
     setForm((f) => ({ ...f, colors: { ...f.colors, [key]: val } }))
   const setPostColor = (key, val) =>
     setForm((f) => ({ ...f, postColors: { ...f.postColors, [key]: val } }))
+
+  const applyPreset = (preset, scheme) => {
+    if (!preset) return
+    setForm((f) => ({
+      ...f,
+      colorScheme: scheme,
+      colors: { ...BLANK_COLORS, ...(preset.colors ?? {}) },
+      postColors: { ...BLANK_POST_COLORS, ...(preset.postColors ?? {}) },
+    }))
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -110,6 +203,36 @@ function ThemeForm({ initial, onSave, onCancel }) {
       </div>
 
       {error && <p className="font-ui text-xs text-error">{error}</p>}
+
+      {/* Start from a preset — fills every field below in one click */}
+      {(lightPreset || darkPreset) && (
+        <div className="flex flex-col gap-1.5">
+          <label className="font-ui text-xs uppercase tracking-widest text-base-content/50">Start From</label>
+          <div className="flex gap-2">
+            {lightPreset && (
+              <button
+                type="button"
+                onClick={() => applyPreset(lightPreset, 'light')}
+                className="px-4 py-2 border-2 border-base-300 hover:border-primary font-ui text-xs uppercase tracking-widest transition-colors"
+              >
+                Light Theme
+              </button>
+            )}
+            {darkPreset && (
+              <button
+                type="button"
+                onClick={() => applyPreset(darkPreset, 'dark')}
+                className="px-4 py-2 border-2 border-base-300 hover:border-primary font-ui text-xs uppercase tracking-widest transition-colors"
+              >
+                Dark Theme
+              </button>
+            )}
+          </div>
+          <p className="font-reading text-xs text-base-content/40 italic">
+            Fills in every color below as a starting point — change any of them afterward.
+          </p>
+        </div>
+      )}
 
       {/* Basic info */}
       <div className="grid grid-cols-2 gap-4">
@@ -149,32 +272,47 @@ function ThemeForm({ initial, onSave, onCancel }) {
       {/* Color tokens */}
       {form.colorScheme !== 'system' && (
         <>
-          <div>
-            <h3 className="font-display text-lg tracking-wide border-b border-base-300 pb-1 mb-3">UI Colors</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {COLOR_TOKENS.map((token) => (
-                <ColorInput key={token} label={token} value={form.colors[token] ?? ''} onChange={(v) => setColor(token, v)} />
-              ))}
-            </div>
+          <div className="flex flex-col gap-6">
+            <h3 className="font-display text-lg tracking-wide border-b border-base-300 pb-1">UI Colors</h3>
+            {TOKEN_GROUPS.map((group) => (
+              <div key={group.title} className="flex flex-col gap-3">
+                <h4 className="font-ui text-xs uppercase tracking-widest text-base-content/50">{group.title}</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {group.tokens.map((t) => (
+                    <ColorInput
+                      key={t.key}
+                      token={t.key}
+                      label={t.label}
+                      hint={t.hint}
+                      value={form.colors[t.key] ?? ''}
+                      onChange={(v) => setColor(t.key, v)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
           <div>
-            <h3 className="font-display text-lg tracking-wide border-b border-base-300 pb-1 mb-3">Post Type Colors</h3>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-              {POST_COLOR_KEYS.map((key) => (
-                <div key={key} className="flex flex-col gap-0.5">
-                  <label className="font-ui text-[10px] uppercase tracking-widest text-base-content/50">{key}</label>
+            <h3 className="font-display text-lg tracking-wide border-b border-base-300 pb-1 mb-1">Post Type Colors</h3>
+            <p className="font-reading text-xs text-base-content/40 italic mb-3">
+              The accent color shown next to each kind of post in the feed.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {POST_COLOR_FIELDS.map(({ key, label }) => (
+                <div key={key} className="flex flex-col gap-1">
+                  <label className="font-ui text-xs text-base-content/80">{label}</label>
                   <div className="flex items-center gap-1">
                     <input
                       type="color"
-                      value={form.postColors[key] ?? '#888888'}
+                      value={swatchValue(form.postColors[key] ?? '#888888')}
                       onChange={(e) => setPostColor(key, e.target.value)}
-                      className="w-8 h-8 border border-base-300 p-0 cursor-pointer bg-transparent"
+                      className="w-9 h-9 shrink-0 border border-base-300 p-0 cursor-pointer bg-transparent"
                     />
                     <input
                       value={form.postColors[key] ?? ''}
                       onChange={(e) => setPostColor(key, e.target.value)}
-                      className="flex-1 min-w-0 border border-base-300 focus:border-primary bg-base-100 px-2 py-1 font-mono text-[11px] outline-none"
+                      className="flex-1 min-w-0 border border-base-300 focus:border-primary bg-base-100 px-2 py-1.5 font-mono text-[11px] outline-none"
                     />
                   </div>
                 </div>
@@ -268,13 +406,21 @@ export default function AdminThemesPage() {
     system: 'bg-base-300 text-base-content/60',
   }
 
+  // Built-in Light/Dark themes — used to prefill "New Theme" and power the
+  // "Start From" preset buttons in the form.
+  const presets = {
+    light: themes.find((t) => t.id === 'kowloon-light'),
+    dark: themes.find((t) => t.id === 'kowloon-dark'),
+  }
+
   return (
     <div>
       <div className="flex items-baseline justify-between border-b-2 border-base-300 pb-4 mb-6">
         <h1 className="font-display text-5xl tracking-wide">Themes</h1>
         <button
           onClick={() => setEditing('new')}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-content font-ui text-xs uppercase tracking-widest"
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-content font-ui text-xs uppercase tracking-widest disabled:opacity-50"
         >
           <Plus size={13} /> New Theme
         </button>
@@ -283,6 +429,7 @@ export default function AdminThemesPage() {
       {editing && (
         <ThemeForm
           initial={editing === 'new' ? null : editing}
+          presets={presets}
           onSave={handleSave}
           onCancel={() => setEditing(null)}
         />
