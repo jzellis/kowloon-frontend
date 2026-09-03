@@ -30,7 +30,18 @@ import { TypographyProvider } from '../lib/TypographyProvider'
 // once the server's real theme list arrives. See app/store.js for the one
 // remaining override this doesn't cover (a logged-in user's own saved theme
 // preference, applied after session restore) — guarded there directly.
-store.dispatch(setActiveTheme('kowloon-dark'))
+//
+// GUARDED on hostname (2026-09-03 fix): this file is statically imported by
+// main.jsx unconditionally (so it's part of the one shared bundle regardless
+// of which component actually gets rendered) — module-level code here runs
+// on EVERY page load, main site included, not just pics.<domain>. Without
+// this check, every visit to the main site force-set + persisted dark theme
+// to localStorage, silently overriding the server's/admin's default theme
+// resolution in fetchThemesAsync.fulfilled moments later. Found while
+// verifying the admin site-theme feature actually reaches real visitors.
+if (window.location.hostname.startsWith('pics.')) {
+  store.dispatch(setActiveTheme('kowloon-dark'))
+}
 
 export default function PicsApp() {
   return (
