@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, Trash2, Pencil, Star, Check, X } from 'lucide-react'
+import { HexColorPicker, HexColorInput } from 'react-colorful'
 import { useClient } from '../../hooks/useClient'
 import { useDispatch } from 'react-redux'
 import { fetchThemesAsync } from '../../features/theme/themeSlice'
 import Spinner from '../../components/ui/Spinner'
+import Modal from '../../components/ui/Modal'
 
 // DaisyUI v5 color tokens, grouped and plain-language labeled for admins who
 // don't know CSS. The raw token name is still shown as a small hint underneath
@@ -106,14 +108,73 @@ function ThemeSwatches({ theme }) {
   )
 }
 
+// The actual picker UI, only ever mounted while the modal is open (see
+// ColorPickerModal below) -- that makes `useState(() => swatchValue(value))`
+// the right tool for seeding `draft` from the current value: a fresh mount
+// on every open naturally re-seeds it, no effect/setState-in-effect needed.
+function ColorPickerModalBody({ value, onClose, onPick }) {
+  const [draft, setDraft] = useState(() => swatchValue(value))
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <HexColorPicker
+        color={draft}
+        onChange={setDraft}
+        style={{ width: '100%', maxWidth: 260 }}
+      />
+      <div className="flex items-center gap-2 w-full max-w-[260px]">
+        <span
+          style={{ background: draft, width: 28, height: 28, flexShrink: 0 }}
+          className="border border-base-300"
+        />
+        <HexColorInput
+          color={draft}
+          onChange={setDraft}
+          prefixed
+          className="flex-1 min-w-0 border border-base-300 focus:border-primary bg-base-100 px-2 py-1.5 font-mono text-sm outline-none"
+        />
+      </div>
+      <div className="flex gap-3 w-full max-w-[260px]">
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex-1 px-4 py-2 border border-base-300 font-ui text-xs uppercase tracking-widest hover:bg-base-200 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={() => { onPick(draft); onClose() }}
+          className="flex-1 px-4 py-2 bg-primary text-primary-content font-ui text-xs uppercase tracking-widest"
+        >
+          Use Color
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Picker modal: a real spectrum + hue slider (react-colorful), not the
+// browser's native <input type="color"> -- Android Chrome's version of that
+// is just a fixed row of ~8 preset swatches with no spectrum at all, and
+// desktop/iOS pickers vary wildly by OS. This renders identically everywhere.
+// Seeds from the current value (falling back to gray for a non-hex value
+// like an oklch(...) string, which react-colorful can't parse either) and
+// only writes back on "Use Color" -- Cancel discards the draft.
+function ColorPickerModal({ open, label, value, onClose, onPick }) {
+  return (
+    <Modal open={open} onClose={onClose} title={label}>
+      {open && <ColorPickerModalBody value={value} onClose={onClose} onPick={onPick} />}
+    </Modal>
+  )
+}
+
 // Color field: a swatch showing the TRUE current color (its background is
-// set directly from the value, so oklch(...) renders correctly -- a native
-// <input type="color"> can't be given an oklch value, it silently ignores
-// anything that isn't #rrggbb) with an invisible color-picker input layered
-// on top to make the swatch itself clickable, plus a text field for exact
-// values. The plain-language label leads; the raw CSS token name is a small
-// mono hint underneath.
+// set directly from the value, so oklch(...) renders correctly) that opens
+// a ColorPickerModal, plus a text field for exact values. The plain-language
+// label leads; the raw CSS token name is a small mono hint underneath.
 function ColorInput({ label, hint, token, value, onChange }) {
+  const [pickerOpen, setPickerOpen] = useState(false)
   return (
     <div className="flex flex-col gap-1">
       <div>
@@ -121,18 +182,13 @@ function ColorInput({ label, hint, token, value, onChange }) {
         {hint && <p className="font-reading text-[11px] text-base-content/40 italic">{hint}</p>}
       </div>
       <div className="flex items-center gap-2">
-        <label
-          className="relative w-9 h-9 shrink-0 border border-base-300 overflow-hidden cursor-pointer"
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
           style={{ background: value || '#888888' }}
           title="Pick a color"
-        >
-          <input
-            type="color"
-            value={swatchValue(value)}
-            onChange={(e) => onChange(e.target.value)}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          />
-        </label>
+          className="w-9 h-9 shrink-0 border border-base-300 cursor-pointer"
+        />
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -141,6 +197,14 @@ function ColorInput({ label, hint, token, value, onChange }) {
         />
       </div>
       <span className="font-mono text-[10px] text-base-content/30">{token}</span>
+
+      <ColorPickerModal
+        open={pickerOpen}
+        label={label}
+        value={value}
+        onClose={() => setPickerOpen(false)}
+        onPick={onChange}
+      />
     </div>
   )
 }
