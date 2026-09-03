@@ -227,16 +227,17 @@ function PrefControl({ entry, value, onChange, isAdmin, circles, groups, serverT
 }
 
 // Short labels for the Appearance segmented control — matches the app's
-// System/Light/Dark wording (server theme.name is the longer "Kowloon Light"
+// Auto/Light/Dark wording (server theme.name is the longer "Kowloon Light"
 // etc., used nowhere else now that the theme picker isn't a swatch grid).
-const THEME_LABELS = { system: 'System', 'kowloon-light': 'Light', 'kowloon-dark': 'Dark' }
+const THEME_LABELS = { system: 'Auto', 'kowloon-light': 'Light', 'kowloon-dark': 'Dark' }
+const BUILT_IN_THEME_IDS = ['system', 'kowloon-light', 'kowloon-dark']
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
   const authUser = useSelector((state) => state.auth.user)
   const { serverUrl } = useSelector((state) => state.auth)
-  const { available: availableThemes, activeId: activeThemeId } = useSelector((state) => state.theme)
+  const { available: availableThemes, activeId: activeThemeId, serverDefault } = useSelector((state) => state.theme)
   const dispatch = useDispatch()
   const client = useClient()
   const { t } = useTranslation()
@@ -545,24 +546,35 @@ export default function ProfilePage() {
         </div>
       </Section>
 
-      {/* Appearance */}
-      {availableThemes.length > 0 && (
-        <Section title={t('profile.appearance', { defaultValue: 'Appearance' })}>
-          <Field
-            label={t('profile.theme', { defaultValue: 'Theme' })}
-            hint={t('profile.themeHint', { defaultValue: 'Changes apply immediately.' })}
-          >
-            <Segmented
-              value={activeThemeId}
-              onChange={handleThemeSelect}
-              options={availableThemes.map((theme) => ({
-                key: theme.id,
-                label: THEME_LABELS[theme.id] ?? theme.name,
-              }))}
-            />
-          </Field>
-        </Section>
-      )}
+      {/* Appearance — Auto/Light/Dark always; "Site Theme" only appears when
+          the server admin has actually set a custom (non-built-in) theme as
+          the site default. Every OTHER custom theme an admin might have lying
+          around (created but not set live) stays admin-only — this picker is
+          "use the site's look, or override with a system one", not a full
+          theme gallery. */}
+      {availableThemes.length > 0 && (() => {
+        const customSiteTheme = availableThemes.find(
+          (theme) => theme.id === serverDefault && !BUILT_IN_THEME_IDS.includes(theme.id)
+        )
+        const themeOptions = [
+          ...(customSiteTheme
+            ? [{ key: customSiteTheme.id, label: t('profile.siteTheme', { defaultValue: 'Site Theme' }) }]
+            : []),
+          ...availableThemes
+            .filter((theme) => BUILT_IN_THEME_IDS.includes(theme.id))
+            .map((theme) => ({ key: theme.id, label: THEME_LABELS[theme.id] ?? theme.name })),
+        ]
+        return (
+          <Section title={t('profile.appearance', { defaultValue: 'Appearance' })}>
+            <Field
+              label={t('profile.theme', { defaultValue: 'Theme' })}
+              hint={t('profile.themeHint', { defaultValue: 'Changes apply immediately.' })}
+            >
+              <Segmented value={activeThemeId} onChange={handleThemeSelect} options={themeOptions} />
+            </Field>
+          </Section>
+        )
+      })()}
 
       {/* Reading typography */}
       <Section title={t('profile.reading', { defaultValue: 'Reading' })}>
