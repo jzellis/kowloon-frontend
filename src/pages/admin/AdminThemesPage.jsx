@@ -106,9 +106,13 @@ function ThemeSwatches({ theme }) {
   )
 }
 
-// Color field: a native color-picker swatch (doubles as the "sample" and the
-// picker button) + a text field for exact values (hex or oklch). The
-// plain-language label leads; the raw CSS token name is a small mono hint.
+// Color field: a swatch showing the TRUE current color (its background is
+// set directly from the value, so oklch(...) renders correctly -- a native
+// <input type="color"> can't be given an oklch value, it silently ignores
+// anything that isn't #rrggbb) with an invisible color-picker input layered
+// on top to make the swatch itself clickable, plus a text field for exact
+// values. The plain-language label leads; the raw CSS token name is a small
+// mono hint underneath.
 function ColorInput({ label, hint, token, value, onChange }) {
   return (
     <div className="flex flex-col gap-1">
@@ -117,13 +121,18 @@ function ColorInput({ label, hint, token, value, onChange }) {
         {hint && <p className="font-reading text-[11px] text-base-content/40 italic">{hint}</p>}
       </div>
       <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={swatchValue(value)}
-          onChange={(e) => onChange(e.target.value)}
+        <label
+          className="relative w-9 h-9 shrink-0 border border-base-300 overflow-hidden cursor-pointer"
+          style={{ background: value || '#888888' }}
           title="Pick a color"
-          className="w-9 h-9 shrink-0 border border-base-300 p-0 cursor-pointer bg-transparent"
-        />
+        >
+          <input
+            type="color"
+            value={swatchValue(value)}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
+        </label>
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -298,24 +307,15 @@ function ThemeForm({ initial, presets, onSave, onCancel }) {
             <p className="font-reading text-xs text-base-content/40 italic mb-3">
               The accent color shown next to each kind of post in the feed.
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               {POST_COLOR_FIELDS.map(({ key, label }) => (
-                <div key={key} className="flex flex-col gap-1">
-                  <label className="font-ui text-xs text-base-content/80">{label}</label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={swatchValue(form.postColors[key] ?? '#888888')}
-                      onChange={(e) => setPostColor(key, e.target.value)}
-                      className="w-9 h-9 shrink-0 border border-base-300 p-0 cursor-pointer bg-transparent"
-                    />
-                    <input
-                      value={form.postColors[key] ?? ''}
-                      onChange={(e) => setPostColor(key, e.target.value)}
-                      className="flex-1 min-w-0 border border-base-300 focus:border-primary bg-base-100 px-2 py-1.5 font-mono text-[11px] outline-none"
-                    />
-                  </div>
-                </div>
+                <ColorInput
+                  key={key}
+                  token={key}
+                  label={label}
+                  value={form.postColors[key] ?? ''}
+                  onChange={(v) => setPostColor(key, v)}
+                />
               ))}
             </div>
           </div>
