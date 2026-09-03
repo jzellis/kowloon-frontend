@@ -8,11 +8,9 @@
 // index.css's @media (prefers-color-scheme: dark) override handle dark mode.
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getClient } from '../../lib/client'
+import { getClient, resolveServerUrl } from '../../lib/client'
 
 const STORAGE_KEY = 'kowloon_theme'
-const getStoredServerUrl = () =>
-  import.meta.env.VITE_SERVER_URL || localStorage.getItem('kowloon_server_url') || null
 
 // ── CSS injection ─────────────────────────────────────────────────────────────
 
@@ -55,7 +53,15 @@ export const fetchThemesAsync = createAsyncThunk(
   'theme/fetchThemes',
   async (_, { rejectWithValue }) => {
     try {
-      const serverUrl = getStoredServerUrl()
+      // Same resolution as every other API call in the app (explicit config,
+      // env, localStorage, then same-origin) — this slice previously had its
+      // own narrower copy that stopped short of the same-origin fallback, so
+      // a true first-time anonymous visitor (no prior login on that browser,
+      // no VITE_SERVER_URL baked into a same-origin production build) never
+      // got a server URL at all and the fetch silently never fired. That
+      // meant an admin's site-wide theme never actually reached the logged-
+      // out visitors it's mainly for.
+      const serverUrl = resolveServerUrl()
       if (!serverUrl) return rejectWithValue('No server URL')
       const client = getClient(serverUrl)
       return await client.themes.list()
