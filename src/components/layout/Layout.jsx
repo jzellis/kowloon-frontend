@@ -12,6 +12,11 @@ import BottomTabBar from './BottomTabBar'
 
 export default function Layout() {
   const { user, sessionChecked } = useSelector((state) => state.auth)
+  // Must run before the early returns below — a hook called only on some
+  // renders (e.g. once sessionChecked/user become truthy) trips React's
+  // "Rendered more hooks than during the previous render" (#310), which
+  // crashed every protected route once the session finished restoring.
+  const { t } = useTranslation()
 
   if (!sessionChecked) {
     return (
@@ -24,8 +29,6 @@ export default function Layout() {
   if (!user) {
     return <Navigate to="/login" replace />
   }
-
-  const { t } = useTranslation()
 
   return (
     <div className="h-[100svh] flex flex-col bg-base-100">
