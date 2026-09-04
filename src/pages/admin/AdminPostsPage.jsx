@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Trash2, RotateCcw, ExternalLink, Plus, X, ImagePlus, Pencil } from 'lucide-react'
+import { Trash2, RotateCcw, ExternalLink, Plus, X, ImagePlus, Pencil, Compass } from 'lucide-react'
 import { useClient } from '../../hooks/useClient'
 import { useBatchSelect } from '../../hooks/useBatchSelect'
 import stripHtml from '../../lib/stripHtml'
 import Spinner from '../../components/ui/Spinner'
 import RichTextEditor from '../../components/posts/RichTextEditor'
 import BatchActionBar from '../../components/admin/BatchActionBar'
+import AddToDiscoveryModal from '../../components/discover/AddToDiscoveryModal'
 
 function fmtDate(d) {
   if (!d) return '—'
@@ -223,6 +224,7 @@ export default function AdminPostsPage() {
   const [pending, setPending] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [discoveryItem, setDiscoveryItem] = useState(null)
   const { selected, toggle, selectAll, clear, isSelected, allSelected, someSelected, count } = useBatchSelect(posts)
 
   const ownActorId = serverActorId(client)
@@ -393,6 +395,12 @@ export default function AdminPostsPage() {
                     <Link to={`/posts/${encodeURIComponent(p.id)}`} className="p-1 text-base-content/30 hover:text-base-content transition-colors inline-block mr-1" title="View">
                       <ExternalLink size={13} />
                     </Link>
+                    {!p.deletedAt && (
+                      <button onClick={() => setDiscoveryItem(p)}
+                        className="p-1 text-base-content/30 hover:text-base-content transition-colors inline-block mr-1" title="Add to Discovery">
+                        <Compass size={13} />
+                      </button>
+                    )}
                     {!p.deletedAt && ownActorId && p.actorId === ownActorId && (
                       <button onClick={() => { setEditing(p); setShowForm(false) }}
                         className="p-1 text-base-content/30 hover:text-base-content transition-colors inline-block mr-1" title="Edit">
@@ -434,6 +442,13 @@ export default function AdminPostsPage() {
           )}
         </>
       )}
+
+      <AddToDiscoveryModal
+        item={discoveryItem}
+        refType="Post"
+        open={!!discoveryItem}
+        onClose={() => setDiscoveryItem(null)}
+      />
     </div>
   )
 }

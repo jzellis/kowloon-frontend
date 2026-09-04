@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Trash2, RotateCcw, ExternalLink, Plus, X, ImagePlus, Pencil } from 'lucide-react'
+import { Trash2, RotateCcw, ExternalLink, Plus, X, ImagePlus, Pencil, Compass } from 'lucide-react'
 import { useClient } from '../../hooks/useClient'
 import { useBatchSelect } from '../../hooks/useBatchSelect'
 import Spinner from '../../components/ui/Spinner'
 import BatchActionBar from '../../components/admin/BatchActionBar'
+import AddToDiscoveryModal from '../../components/discover/AddToDiscoveryModal'
 
 function fmtDate(d) {
   if (!d) return '—'
@@ -168,6 +169,7 @@ export default function AdminCirclesPage() {
   const [pending, setPending] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [discoveryItem, setDiscoveryItem] = useState(null)
   const { selected, toggle, selectAll, clear, isSelected, allSelected, someSelected, count } = useBatchSelect(circles)
 
   const ownActorId = serverActorId(client)
@@ -326,6 +328,12 @@ export default function AdminCirclesPage() {
                       className="p-1 text-base-content/30 hover:text-base-content transition-colors inline-block mr-1" title="View">
                       <ExternalLink size={13} />
                     </Link>
+                    {!c.deletedAt && (
+                      <button onClick={() => setDiscoveryItem(c)}
+                        className="p-1 text-base-content/30 hover:text-base-content transition-colors inline-block mr-1" title="Add to Discovery">
+                        <Compass size={13} />
+                      </button>
+                    )}
                     {!c.deletedAt && ownActorId && c.actorId === ownActorId && (
                       <button onClick={() => { setEditing(c); setShowForm(false) }}
                         className="p-1 text-base-content/30 hover:text-base-content transition-colors inline-block mr-1" title="Edit">
@@ -369,6 +377,13 @@ export default function AdminCirclesPage() {
           )}
         </>
       )}
+
+      <AddToDiscoveryModal
+        item={discoveryItem}
+        refType="Circle"
+        open={!!discoveryItem}
+        onClose={() => setDiscoveryItem(null)}
+      />
     </div>
   )
 }
