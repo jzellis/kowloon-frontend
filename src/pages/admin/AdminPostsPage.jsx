@@ -352,7 +352,7 @@ export default function AdminPostsPage() {
                   <input type="checkbox" checked={allSelected} ref={(el) => { if (el) el.indeterminate = someSelected }}
                     onChange={() => allSelected ? clear() : selectAll()} className="cursor-pointer" />
                 </th>
-                {['Type', 'Title / Content', 'Author', 'Date', 'Visibility', ''].map((h) => (
+                {['ID', 'Type', 'Title / Content', 'Author', 'Date', 'Visibility', ''].map((h) => (
                   <th key={h} className="font-ui text-xs uppercase tracking-widest text-base-content/50 text-left pb-2 pr-4 last:pr-0">{h}</th>
                 ))}
               </tr>
@@ -363,17 +363,24 @@ export default function AdminPostsPage() {
                   <td className="py-3 pr-3">
                     <input type="checkbox" checked={isSelected(p.id)} onChange={() => toggle(p.id)} className="cursor-pointer" />
                   </td>
+                  <td className="py-3 pr-4 max-w-32">
+                    <Link
+                      to={`/posts/${encodeURIComponent(p.id)}`}
+                      title={p.id}
+                      className="font-mono text-xs text-base-content/60 hover:text-primary transition-colors truncate block"
+                    >
+                      {p.id}
+                    </Link>
+                  </td>
                   <td className="py-3 pr-4">
                     <span className={`font-ui text-xs uppercase tracking-widest px-2 py-0.5 ${TYPE_COLORS[p.type] ?? 'bg-base-200 text-base-content/60'}`}>
                       {p.type ?? '?'}
                     </span>
                   </td>
                   <td className="py-3 pr-4 max-w-xs">
-                    <Link to={`/posts/${encodeURIComponent(p.id)}`} className="hover:text-primary transition-colors">
-                      <span className="font-ui text-sm line-clamp-1">
-                        {p.title ?? p.name ?? p.summary ?? stripHtml(p.body).slice(0, 60) ?? p.id}
-                      </span>
-                    </Link>
+                    <span className="font-ui text-sm line-clamp-1 text-base-content/80">
+                      {p.title ?? p.name ?? p.summary ?? stripHtml(p.body).slice(0, 60) ?? <span className="italic text-base-content/40">Untitled</span>}
+                    </span>
                   </td>
                   <td className="py-3 pr-4 font-ui text-xs text-base-content/50 max-w-28 truncate">{p.actorId}</td>
                   <td className="py-3 pr-4 font-ui text-xs text-base-content/50 whitespace-nowrap">{fmtDate(p.createdAt)}</td>

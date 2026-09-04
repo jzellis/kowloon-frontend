@@ -169,7 +169,8 @@ export default function AdminInvitesPage() {
   const [invites, setInvites] = useState([])
   const [loading, setLoading] = useState(true)
   const [denied, setDenied] = useState(false)
-  const [showForm, setShowForm] = useState(false)
+  // Deep-link from the dashboard's "Create Invite" quick link (/admin/invites?new=1).
+  const [showForm, setShowForm] = useState(() => new URLSearchParams(window.location.search).get('new') === '1')
   const [filter, setFilter] = useState('active')
   const [pending, setPending] = useState(null)
   const [qrInvite, setQrInvite] = useState(null)

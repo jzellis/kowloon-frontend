@@ -212,7 +212,8 @@ export default function AdminPagesPage() {
   const [denied, setDenied] = useState(false)
   const [filter, setFilter] = useState('active')
   const [pending, setPending] = useState(false)
-  const [showForm, setShowForm] = useState(false)
+  // Deep-link from the dashboard's "Create Page" quick link (/admin/pages?new=1).
+  const [showForm, setShowForm] = useState(() => new URLSearchParams(window.location.search).get('new') === '1')
   const [editing, setEditing] = useState(null)
   const { selected, toggle, selectAll, clear, isSelected, allSelected, someSelected, count } = useBatchSelect(pages)
 

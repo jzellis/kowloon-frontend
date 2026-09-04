@@ -785,12 +785,6 @@ function AppearanceSection({ settings, client, onSaved }) {
       <FieldRow label="Subtitle" description="Short tagline shown under the server name.">
         <TextInput value={form.subtitle} onChange={(v) => set('subtitle', v)} disabled={saving} />
       </FieldRow>
-      <FieldRow label="Description" description="Public-facing server description, shown on the homepage.">
-        <HtmlEditor value={form.description} onChange={(v) => set('description', v)} disabled={saving} />
-      </FieldRow>
-      <FieldRow label="Location" description="Optional location name shown in the server profile.">
-        <TextInput value={form.locationName} onChange={(v) => set('locationName', v)} disabled={saving} />
-      </FieldRow>
       <ImageUploadField
         label="Server icon" client={client} value={form.icon}
         description="Used in the header and federation previews. Recommended: square, at least 200x200px."
@@ -801,6 +795,12 @@ function AppearanceSection({ settings, client, onSaved }) {
         description="Banner shown in the sidebar. Recommended: 1200x400px or wider."
         onUploaded={(url) => handleImageUploaded('image', url)}
       />
+      <FieldRow label="Description" description="Public-facing server description, shown on the homepage.">
+        <HtmlEditor value={form.description} onChange={(v) => set('description', v)} disabled={saving} />
+      </FieldRow>
+      <FieldRow label="Location" description="Optional location name shown in the server profile.">
+        <TextInput value={form.locationName} onChange={(v) => set('locationName', v)} disabled={saving} />
+      </FieldRow>
       <SaveBar saving={saving} saved={saved} error={error} onSave={() => saveProfile()} dirty={dirty} />
 
       {emojiSetting && (

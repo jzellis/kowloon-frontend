@@ -2,8 +2,33 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { Plus, BookOpen, Bookmark, Mail } from 'lucide-react'
 import { useClient } from '../../hooks/useClient'
 import Spinner from '../../components/ui/Spinner'
+
+const QUICK_LINKS = [
+  { to: '/admin/pages?new=1',     label: 'Create Page',     icon: BookOpen },
+  { to: '/admin/bookmarks?new=1', label: 'Create Bookmark', icon: Bookmark },
+  { to: '/admin/invites?new=1',   label: 'Create Invite',   icon: Mail },
+]
+
+function QuickLinks() {
+  return (
+    <div className="flex flex-wrap gap-3 mb-8">
+      {QUICK_LINKS.map(({ to, label, icon: Icon }) => (
+        <Link
+          key={to}
+          to={to}
+          className="flex items-center gap-2 px-4 py-2.5 border-2 border-base-300 hover:border-primary hover:text-primary transition-colors font-ui text-xs uppercase tracking-widest text-base-content/70"
+        >
+          <Plus size={13} />
+          <Icon size={14} />
+          {label}
+        </Link>
+      ))}
+    </div>
+  )
+}
 
 function StatCard({ label, value, sub, to }) {
   const inner = (
@@ -80,6 +105,8 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <h1 className="font-display text-5xl tracking-wide mb-8">Dashboard</h1>
+
+      <QuickLinks />
 
       <SectionTitle>Content</SectionTitle>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">

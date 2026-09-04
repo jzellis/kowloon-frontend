@@ -200,7 +200,8 @@ export default function AdminBookmarksPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [pending, setPending] = useState(false)
-  const [showForm, setShowForm] = useState(false)
+  // Deep-link from the dashboard's "Create Bookmark" quick link (/admin/bookmarks?new=1).
+  const [showForm, setShowForm] = useState(() => new URLSearchParams(window.location.search).get('new') === '1')
   const [editing, setEditing] = useState(null)
   const { selected, toggle, selectAll, clear, isSelected, allSelected, someSelected, count } = useBatchSelect(bookmarks)
 
