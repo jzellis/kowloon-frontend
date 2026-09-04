@@ -379,7 +379,9 @@ export default function AdminPostsPage() {
                   </td>
                   <td className="py-3 pr-4 max-w-xs">
                     <span className="font-ui text-sm line-clamp-1 text-base-content/80">
-                      {p.title ?? p.name ?? p.summary ?? stripHtml(p.body).slice(0, 60) ?? <span className="italic text-base-content/40">Untitled</span>}
+                      {/* || not ?? -- an empty-body Media post's stripHtml().slice() is "", which
+                          is non-nullish and would otherwise win over the "Untitled" fallback. */}
+                      {p.title || p.name || p.summary || stripHtml(p.body).slice(0, 60) || <span className="italic text-base-content/40">Untitled</span>}
                     </span>
                   </td>
                   <td className="py-3 pr-4 font-ui text-xs text-base-content/50 max-w-28 truncate">{p.actorId}</td>
