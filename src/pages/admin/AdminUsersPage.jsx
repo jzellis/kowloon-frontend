@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { Trash2, RotateCcw } from 'lucide-react'
+import { Trash2, RotateCcw, Search, X } from 'lucide-react'
 import { useClient } from '../../hooks/useClient'
 import { useBatchSelect } from '../../hooks/useBatchSelect'
 import Spinner from '../../components/ui/Spinner'
 import BatchActionBar from '../../components/admin/BatchActionBar'
+
+const SEARCH_DEBOUNCE_MS = 300
+const SEARCH_MIN_CHARS = 2
 
 function fmtDate(d) {
   if (!d) return '—'
@@ -20,7 +23,19 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [pending, setPending] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
   const { selected, toggle, selectAll, clear, isSelected, allSelected, someSelected, count } = useBatchSelect(users)
+
+  // Debounced, and only actually searches once there's nothing (cleared) or
+  // at least SEARCH_MIN_CHARS -- a lone first character just waits rather
+  // than firing a near-useless single-letter query.
+  useEffect(() => {
+    const trimmed = searchInput.trim()
+    if (trimmed.length > 0 && trimmed.length < SEARCH_MIN_CHARS) return
+    const t = setTimeout(() => setSearch(trimmed), SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(t)
+  }, [searchInput])
 
   const load = useCallback(async () => {
     if (!client) return
@@ -29,6 +44,7 @@ export default function AdminUsersPage() {
       const params = { page }
       if (filter === 'deleted') params.showDeleted = true
       else if (filter === 'all') params.deleted = 'include'
+      if (search) params.search = search
       const res = await client.admin.getUsers(params)
       setUsers(res?.orderedItems ?? [])
       setTotal(res?.totalItems ?? 0)
@@ -37,10 +53,11 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false)
     }
-  }, [client, filter, page])
+  }, [client, filter, page, search])
 
   useEffect(() => { load() }, [load])
-  useEffect(() => { clear() }, [filter, page])
+  useEffect(() => { clear() }, [filter, page, search])
+  useEffect(() => { setPage(1) }, [search])
 
   const handleDelete = async (userId) => {
     setPending(true)
@@ -101,15 +118,34 @@ export default function AdminUsersPage() {
         <span className="font-ui text-xs uppercase tracking-widest text-base-content/40">{total} total</span>
       </div>
 
-      <div className="flex gap-0 mb-4">
-        {FILTERS.map(([val, label]) => (
-          <button key={val} onClick={() => { setFilter(val); setPage(1) }}
-            className={`px-4 py-2 font-ui text-xs uppercase tracking-widest border-r border-base-300 last:border-r-0 transition-colors ${
-              filter === val ? 'bg-secondary text-secondary-content' : 'bg-base-200 text-base-content/60 hover:bg-base-300'
-            }`}>
-            {label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex gap-0">
+          {FILTERS.map(([val, label]) => (
+            <button key={val} onClick={() => { setFilter(val); setPage(1) }}
+              className={`px-4 py-2 font-ui text-xs uppercase tracking-widest border-r border-base-300 last:border-r-0 transition-colors ${
+                filter === val ? 'bg-secondary text-secondary-content' : 'bg-base-200 text-base-content/60 hover:bg-base-300'
+              }`}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full max-w-64">
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search name, username, ID…"
+            className="w-full pl-8 pr-8 py-2 border border-base-300 focus:border-primary bg-base-100 font-ui text-sm outline-none"
+          />
+          {searchInput && (
+            <button onClick={() => setSearchInput('')} title="Clear search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content transition-colors">
+              <X size={13} />
+            </button>
+          )}
+        </div>
       </div>
 
       <BatchActionBar count={count} filter={filter} busy={pending}
