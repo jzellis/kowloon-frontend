@@ -10,24 +10,54 @@ import {
   Mail, Flag, Settings, ArrowLeft, Palette, BookOpen, Bookmark,
   Menu, X, ScrollText, Compass,
 } from 'lucide-react'
+import sizedUrl from '../../lib/sizedUrl'
 
-const NAV = [
-  { to: '/admin',            label: 'Dashboard',   icon: LayoutDashboard, end: true },
-  { to: '/admin/users',      label: 'Users',        icon: Users },
-  { to: '/admin/posts',      label: 'Posts',        icon: FileText },
-  { to: '/admin/groups',     label: 'Groups',       icon: Users2 },
-  { to: '/admin/circles',    label: 'Circles',      icon: Circle },
-  { to: '/admin/pages',      label: 'Pages',        icon: BookOpen },
-  { to: '/admin/bookmarks',  label: 'Bookmarks',    icon: Bookmark },
-  { to: '/admin/invites',    label: 'Invites',      icon: Mail },
-  { to: '/admin/discovery',  label: 'Discover',     icon: Compass },
-  { to: '/admin/moderation', label: 'Moderation',   icon: Flag },
-  { to: '/admin/themes',     label: 'Themes',       icon: Palette },
-  { to: '/admin/settings',   label: 'Settings',     icon: Settings },
-  { to: '/admin/logs',       label: 'Logs',         icon: ScrollText },
+// Ungrouped items (just Dashboard) render with no subtitle above them;
+// everything else is grouped under the subtitle the group is keyed by.
+const NAV_GROUPS = [
+  {
+    label: null,
+    items: [
+      { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    ],
+  },
+  {
+    label: 'Manage',
+    items: [
+      { to: '/admin/users',   label: 'Users',   icon: Users },
+      { to: '/admin/posts',   label: 'Posts',   icon: FileText },
+      { to: '/admin/circles', label: 'Circles', icon: Circle },
+      { to: '/admin/groups',  label: 'Groups',  icon: Users2 },
+    ],
+  },
+  {
+    label: 'Community',
+    items: [
+      { to: '/admin/discovery', label: 'Discover',  icon: Compass },
+      { to: '/admin/pages',     label: 'Pages',      icon: BookOpen },
+      { to: '/admin/bookmarks', label: 'Bookmarks',  icon: Bookmark },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { to: '/admin/invites',    label: 'Invites',    icon: Mail },
+      { to: '/admin/moderation', label: 'Moderation', icon: Flag },
+      { to: '/admin/themes',     label: 'Themes',     icon: Palette },
+      { to: '/admin/settings',   label: 'Settings',   icon: Settings },
+      { to: '/admin/logs',       label: 'Logs',       icon: ScrollText },
+    ],
+  },
 ]
 
 function SidebarContent() {
+  const server = useSelector((state) => state.server)
+  const user = useSelector((state) => state.auth.user)
+  const serverName = server.name || 'Kowloon'
+  const avatarUrl = user?.profile?.icon ?? null
+  const displayName = user?.profile?.name || user?.username
+  const userInitial = user?.username?.[0]?.toUpperCase() ?? '?'
+
   return (
     <>
       <div className="px-5 pt-6 pb-4 border-b border-secondary-content/20">
@@ -38,31 +68,56 @@ function SidebarContent() {
           <ArrowLeft size={12} />
           Back to Site
         </Link>
-        <p className="font-display text-3xl tracking-widest leading-none">ADMIN</p>
+        <p className="font-display text-3xl tracking-widest leading-none truncate">{serverName}</p>
         <p className="font-ui text-xs uppercase tracking-widest opacity-50 mt-1">Control Panel</p>
       </div>
 
-      <nav className="flex flex-col py-4 flex-1" aria-label="Admin navigation">
-        {NAV.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-5 py-2.5 font-ui text-xs uppercase tracking-widest transition-colors ${
-                isActive
-                  ? 'bg-secondary-content/15 border-l-2 border-primary text-secondary-content'
-                  : 'text-secondary-content/60 hover:text-secondary-content hover:bg-secondary-content/10 border-l-2 border-transparent'
-              }`
-            }
-          >
-            <Icon size={14} aria-hidden="true" />
-            {label}
-          </NavLink>
+      <nav className="flex flex-col py-2 flex-1" aria-label="Admin navigation">
+        {NAV_GROUPS.map(({ label, items }) => (
+          <div key={label ?? 'top'}>
+            {label && (
+              <p className="px-5 pt-4 pb-1 font-ui text-[10px] uppercase tracking-widest text-secondary-content/40">
+                {label}
+              </p>
+            )}
+            {items.map(({ to, label: itemLabel, icon: Icon, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-5 py-2.5 font-ui text-xs uppercase tracking-widest transition-colors ${
+                    isActive
+                      ? 'bg-secondary-content/15 border-l-2 border-primary text-secondary-content'
+                      : 'text-secondary-content/60 hover:text-secondary-content hover:bg-secondary-content/10 border-l-2 border-transparent'
+                  }`
+                }
+              >
+                <Icon size={14} aria-hidden="true" />
+                {itemLabel}
+              </NavLink>
+            ))}
+          </div>
         ))}
       </nav>
 
-      <div className="px-5 py-4 border-t border-secondary-content/20">
+      <div className="px-5 py-3 border-t border-secondary-content/20">
+        <p className="font-ui text-[10px] uppercase tracking-widest text-secondary-content/40 mb-2">
+          Logged in as
+        </p>
+        <div className="flex items-center gap-2.5 mb-3">
+          {avatarUrl ? (
+            <img src={sizedUrl(avatarUrl, 200)} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+              <span className="font-display text-sm text-primary-content">{userInitial}</span>
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="font-ui text-sm text-secondary-content truncate">{displayName}</p>
+            <p className="font-ui text-[10px] text-secondary-content/50 truncate">{user?.id}</p>
+          </div>
+        </div>
         <Link
           to="/"
           className="flex items-center gap-2 font-ui text-xs uppercase tracking-widest text-secondary-content/50 hover:text-secondary-content transition-colors"
@@ -77,6 +132,8 @@ function SidebarContent() {
 
 export default function AdminLayout() {
   const { user, sessionChecked } = useSelector((s) => s.auth)
+  const server = useSelector((s) => s.server)
+  const serverName = server.name || 'Kowloon'
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   // Lock body scroll + close on Escape while drawer is open.
@@ -146,7 +203,7 @@ export default function AdminLayout() {
           >
             <Menu size={20} />
           </button>
-          <p className="font-display text-xl tracking-widest leading-none">ADMIN</p>
+          <p className="font-display text-xl tracking-widest leading-none truncate">{serverName}</p>
           <Link
             to="/"
             className="ml-auto inline-flex items-center gap-1.5 font-ui text-xs uppercase tracking-widest text-secondary-content/60 hover:text-secondary-content transition-colors"
