@@ -907,6 +907,7 @@ function EmailSection({ settings, client, onSaved }) {
     port:     initialSmtp.port     ?? 587,
     username: initialSmtp.username ?? '',
     password: initialSmtp.password ?? '',
+    from:     initialSmtp.from     ?? '',
   })
   const [requireVerif, setRequireVerif] = useState(Boolean(verifSetting?.value))
   const [saving, setSaving] = useState(false)
@@ -916,6 +917,7 @@ function EmailSection({ settings, client, onSaved }) {
   const initialForm = {
     host: initialSmtp.host ?? '', port: initialSmtp.port ?? 587,
     username: initialSmtp.username ?? '', password: initialSmtp.password ?? '',
+    from: initialSmtp.from ?? '',
   }
   const initialVerif = Boolean(verifSetting?.value)
   const dirty = JSON.stringify(form) !== JSON.stringify(initialForm) || requireVerif !== initialVerif
@@ -925,7 +927,7 @@ function EmailSection({ settings, client, onSaved }) {
   const save = async () => {
     setSaving(true); setError(null); setSaved(false)
     try {
-      const emailValue = { ...initialSmtp, host: form.host, port: Number(form.port), username: form.username, password: form.password }
+      const emailValue = { ...initialSmtp, host: form.host, port: Number(form.port), username: form.username, password: form.password, from: form.from }
       await client.admin.updateSetting({ settingId: 'emailServer', value: emailValue })
       onSaved('emailServer', emailValue)
       await client.admin.updateSetting({ settingId: 'requireEmailVerification', value: requireVerif })
@@ -952,6 +954,10 @@ function EmailSection({ settings, client, onSaved }) {
       </FieldRow>
       <FieldRow label="Password">
         <PasswordInput value={form.password} onChange={(v) => set('password', v)} disabled={saving} />
+      </FieldRow>
+      <FieldRow label="From address"
+        description="Leave blank to send from the Username above (always deliverable, since it's the address your SMTP provider actually authenticates as). Only set this to something else if that address is also authorized to send through this account -- otherwise mail lands in spam.">
+        <TextInput value={form.from} onChange={(v) => set('from', v)} placeholder={form.username || 'noreply@example.com'} disabled={saving} />
       </FieldRow>
       <FieldRow label="Require email verification"
         description="New accounts must verify their email before logging in. Requires working SMTP above.">
