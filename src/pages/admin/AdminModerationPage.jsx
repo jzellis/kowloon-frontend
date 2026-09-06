@@ -1,7 +1,7 @@
-// AdminModerationPage — review and resolve flagged items.
+// AdminModerationPage — review and act on flagged items.
 
-import { useState, useEffect, useCallback } from 'react'
-import { ExternalLink, CheckCircle, XCircle } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { ExternalLink, Trash2, EyeOff, MoreVertical, UserX, Flame } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useClient } from '../../hooks/useClient'
 import Spinner from '../../components/ui/Spinner'
@@ -21,74 +21,60 @@ function reasonLabel(reason, fallback = '—') {
   return reason.label || reason.description || reason.code || fallback
 }
 
-function ResolveModal({ flag, onClose, onResolved }) {
-  const client = useClient()
-  const [status, setStatus] = useState('resolved')
-  const [notes, setNotes] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState(null)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
-    try {
-      const res = await client.admin.resolveFlag({ flagId: flag.id, status, notes: notes || undefined })
-      onResolved(res.flag)
-    } catch (err) {
-      setError(err?.message || 'Failed to resolve flag')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <form onSubmit={handleSubmit} className="bg-base-100 border-2 border-base-300 p-6 w-full max-w-md flex flex-col gap-4"
-        onClick={(e) => e.stopPropagation()}>
-        <h2 className="font-display text-2xl tracking-wide">Resolve Flag</h2>
-        <p className="font-ui text-xs text-base-content/60">{reasonLabel(flag.reason, 'No reason given')}</p>
-        {error && <p className="font-ui text-xs text-error">{error}</p>}
-
-        <div className="flex gap-0">
-          {['resolved', 'dismissed'].map((s) => (
-            <button key={s} type="button" onClick={() => setStatus(s)}
-              className={`px-4 py-2 font-ui text-xs uppercase tracking-widest border-r border-base-300 last:border-r-0 transition-colors ${
-                status === s ? 'bg-secondary text-secondary-content' : 'bg-base-200 text-base-content/60 hover:bg-base-300'
-              }`}>
-              {s}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="font-ui text-xs uppercase tracking-widest text-base-content/50">Notes</label>
-          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
-            className="border-2 border-base-300 focus:border-primary bg-base-100 px-3 py-2 font-ui text-sm outline-none resize-none" />
-        </div>
-
-        <div className="flex gap-3">
-          <button type="submit" disabled={saving}
-            className="px-5 py-2 bg-primary text-primary-content font-ui text-xs uppercase tracking-widest disabled:opacity-50">
-            {saving ? 'Saving…' : 'Confirm'}
-          </button>
-          <button type="button" onClick={onClose}
-            className="px-5 py-2 border border-base-300 font-ui text-xs uppercase tracking-widest hover:bg-base-200 transition-colors">
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  )
-}
-
+// Flag.target holds the flagged object's Kowloon ID -- the table/link logic
+// here previously read flag.targetId, a field that doesn't exist on the
+// schema (it's "target"), so the link and ID never rendered at all.
 function targetPath(flag) {
-  if (!flag?.targetId) return null
-  const id = flag.targetId
-  if (id.startsWith('post:')) return `/posts/${encodeURIComponent(id)}`
+  if (!flag?.target) return null
+  const id = flag.target
+  if (id.startsWith('post:') || id.startsWith('reply:')) return `/posts/${encodeURIComponent(id)}`
   if (id.startsWith('group:')) return `/groups/${encodeURIComponent(id)}`
+  if (id.startsWith('circle:')) return `/circles/${encodeURIComponent(id)}`
+  if (id.startsWith('page:')) return `/pages/${encodeURIComponent(id)}`
   if (id.startsWith('@')) return `/users/${encodeURIComponent(id)}`
   return null
+}
+
+// Kebab menu: Block Creator (deactivates the target's author account) and
+// Hard Delete (permanently removes the item -- for material serious enough
+// that even a soft-deleted record shouldn't linger). Both are one-way and
+// confirmed before firing.
+function ActionMenu({ flag, busy, onBlock, onHardDelete }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onClickAway = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', onClickAway)
+    return () => document.removeEventListener('mousedown', onClickAway)
+  }, [open])
+
+  return (
+    <div className="relative inline-block" ref={ref}>
+      <button onClick={() => setOpen((o) => !o)} disabled={busy}
+        className="p-1 text-base-content/40 hover:text-base-content transition-colors disabled:opacity-30" title="More">
+        <MoreVertical size={14} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-20 w-48 bg-base-100 border-2 border-base-300 shadow-lg flex flex-col">
+          <button
+            onClick={() => { setOpen(false); onBlock() }}
+            disabled={!flag.targetActorId}
+            className="flex items-center gap-2 px-3 py-2.5 text-left font-ui text-xs uppercase tracking-widest text-base-content hover:bg-base-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <UserX size={13} /> Block Creator
+          </button>
+          <button
+            onClick={() => { setOpen(false); onHardDelete() }}
+            className="flex items-center gap-2 px-3 py-2.5 text-left font-ui text-xs uppercase tracking-widest text-error hover:bg-error/10 transition-colors"
+          >
+            <Flame size={13} /> Hard Delete
+          </button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function AdminModerationPage() {
@@ -97,7 +83,8 @@ export default function AdminModerationPage() {
   const [loading, setLoading] = useState(true)
   const [denied, setDenied] = useState(false)
   const [filter, setFilter] = useState('open')
-  const [resolving, setResolving] = useState(null)
+  const [busyId, setBusyId] = useState(null)
+  const [error, setError] = useState(null)
 
   const load = useCallback(async () => {
     if (!client) return
@@ -114,9 +101,37 @@ export default function AdminModerationPage() {
 
   useEffect(() => { load() }, [load])
 
-  const handleResolved = (updated) => {
-    setFlags((prev) => prev.map((f) => f.id === updated.id ? updated : f))
-    setResolving(null)
+  // Row actions only render while viewing the "open" filter, and every one
+  // of them resolves the flag away from "open" -- so on success it simply
+  // drops out of the current (open-only) list.
+  const runAction = async (flag, action) => {
+    setBusyId(flag.id)
+    setError(null)
+    try {
+      await action()
+      setFlags((prev) => prev.filter((f) => f.id !== flag.id))
+    } catch (err) {
+      setError(err?.message || 'Action failed')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const handleIgnore = (flag) => runAction(flag, () => client.admin.ignoreFlag({ flagId: flag.id }))
+
+  const handleRemove = (flag) => {
+    if (!confirm(`Remove this ${flag.targetType || 'item'}? Its author will be notified.`)) return
+    runAction(flag, () => client.admin.removeFlaggedItem({ flagId: flag.id }))
+  }
+
+  const handleBlock = (flag) => {
+    if (!confirm(`Deactivate ${flag.targetActorId}'s account? This can be undone from Users, but they'll be logged out immediately.`)) return
+    runAction(flag, () => client.admin.blockFlaggedAuthor({ flagId: flag.id }))
+  }
+
+  const handleHardDelete = (flag) => {
+    if (!confirm(`Permanently delete this ${flag.targetType || 'item'}? This cannot be undone.`)) return
+    runAction(flag, () => client.admin.hardDeleteFlaggedItem({ flagId: flag.id }))
   }
 
   if (denied) return (
@@ -127,8 +142,6 @@ export default function AdminModerationPage() {
 
   return (
     <div>
-      {resolving && <ResolveModal flag={resolving} onClose={() => setResolving(null)} onResolved={handleResolved} />}
-
       <div className="flex items-baseline justify-between border-b-2 border-base-300 pb-4 mb-6">
         <h1 className="font-display text-5xl tracking-wide">Moderation</h1>
         <span className="font-ui text-xs uppercase tracking-widest text-base-content/40">{flags.length} items</span>
@@ -145,11 +158,13 @@ export default function AdminModerationPage() {
         ))}
       </div>
 
+      {error && <p className="font-ui text-sm text-error mb-4">{error}</p>}
+
       {loading ? <Spinner centered /> : (
         <table className="w-full">
           <thead>
             <tr className="border-b-2 border-base-300">
-              {['Target', 'Reporter', 'Reason', 'Flagged', 'Status', ''].map((h) => (
+              {['Target', 'Author', 'Reporter', 'Reason', 'Flagged', 'Status', ''].map((h) => (
                 <th key={h} className="font-ui text-xs uppercase tracking-widest text-base-content/50 text-left pb-2 pr-4 last:pr-0">{h}</th>
               ))}
             </tr>
@@ -157,11 +172,12 @@ export default function AdminModerationPage() {
           <tbody>
             {flags.map((flag) => {
               const path = targetPath(flag)
+              const busy = busyId === flag.id
               return (
                 <tr key={flag.id} className="border-b border-base-300 hover:bg-base-200">
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-1">
-                      <span className="font-mono text-xs text-base-content/50 max-w-36 truncate block">{flag.targetId ?? '—'}</span>
+                      <span className="font-mono text-xs text-base-content/50 max-w-36 truncate block">{flag.target ?? '—'}</span>
                       {path && (
                         <Link to={path} className="p-0.5 text-base-content/30 hover:text-base-content transition-colors" title="View">
                           <ExternalLink size={11} />
@@ -172,6 +188,7 @@ export default function AdminModerationPage() {
                       <span className="font-ui text-xs uppercase tracking-widest text-base-content/40">{flag.targetType}</span>
                     )}
                   </td>
+                  <td className="py-3 pr-4 font-ui text-xs text-base-content/50 max-w-28 truncate">{flag.targetActorId ?? '—'}</td>
                   <td className="py-3 pr-4 font-ui text-xs text-base-content/50 max-w-28 truncate">{flag.actorId ?? '—'}</td>
                   <td className="py-3 pr-4 font-ui text-sm max-w-48">
                     <span className="line-clamp-2">{reasonLabel(flag.reason)}</span>
@@ -187,21 +204,18 @@ export default function AdminModerationPage() {
                       {flag.status}
                     </span>
                   </td>
-                  <td className="py-3 text-right">
+                  <td className="py-3 text-right whitespace-nowrap">
                     {flag.status === 'open' && (
                       <div className="flex items-center gap-1 justify-end">
-                        <button onClick={() => setResolving(flag)}
-                          className="p-1 text-base-content/40 hover:text-success transition-colors" title="Resolve">
-                          <CheckCircle size={14} />
+                        <button onClick={() => handleRemove(flag)} disabled={busy}
+                          className="p-1 text-base-content/40 hover:text-error transition-colors disabled:opacity-30" title="Remove item">
+                          <Trash2 size={14} />
                         </button>
-                        <button onClick={() => {
-                          client.admin.resolveFlag({ flagId: flag.id, status: 'dismissed' })
-                            .then((res) => handleResolved(res.flag))
-                            .catch(() => {})
-                        }}
-                          className="p-1 text-base-content/40 hover:text-error transition-colors" title="Dismiss">
-                          <XCircle size={14} />
+                        <button onClick={() => handleIgnore(flag)} disabled={busy}
+                          className="p-1 text-base-content/40 hover:text-base-content transition-colors disabled:opacity-30" title="Ignore">
+                          <EyeOff size={14} />
                         </button>
+                        <ActionMenu flag={flag} busy={busy} onBlock={() => handleBlock(flag)} onHardDelete={() => handleHardDelete(flag)} />
                       </div>
                     )}
                   </td>
@@ -209,7 +223,7 @@ export default function AdminModerationPage() {
               )
             })}
             {flags.length === 0 && (
-              <tr><td colSpan={6} className="py-8 text-center font-ui text-xs uppercase tracking-widest text-base-content/40">
+              <tr><td colSpan={7} className="py-8 text-center font-ui text-xs uppercase tracking-widest text-base-content/40">
                 {filter === 'open' ? 'No open flags — all clear.' : 'No items found.'}
               </td></tr>
             )}

@@ -11,7 +11,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useClient } from '../hooks/useClient'
-import { MessageSquare, Heart, UserPlus, Users, Bell, X, Check, CheckCheck } from 'lucide-react'
+import { MessageSquare, Heart, UserPlus, Users, Bell, Flag, X, Check, CheckCheck } from 'lucide-react'
 import Timestamp from '../components/ui/Timestamp'
 import UserAvatar from '../components/ui/UserAvatar'
 import Spinner from '../components/ui/Spinner'
@@ -28,6 +28,7 @@ const NOTIF_ICONS = {
   new_post:      <Bell          size={14} />,
   join_request:  <Users         size={14} />,
   join_approved: <Users         size={14} />,
+  moderation:    <Flag          size={14} />,
 }
 
 const NOTIF_COLORS = {
@@ -37,6 +38,7 @@ const NOTIF_COLORS = {
   new_post:      'text-base-content/60',
   join_request:  'text-secondary',
   join_approved: 'text-secondary',
+  moderation:    'text-warning',
 }
 
 // ── Routing ───────────────────────────────────────────────────────────────────
