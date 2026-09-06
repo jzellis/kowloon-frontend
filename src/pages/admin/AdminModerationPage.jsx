@@ -11,6 +11,16 @@ function fmtDate(d) {
   return new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
+// Flag.reason is a required Object ({code, label, description, details?} --
+// see schema/Flag.js and ActivityParser/handlers/Flag/index.js), never a
+// plain string -- rendering it directly threw "Objects are not valid as a
+// React child" (minified error #31) for every flag with a reason set.
+function reasonLabel(reason, fallback = '—') {
+  if (!reason) return fallback
+  if (typeof reason === 'string') return reason
+  return reason.label || reason.description || reason.code || fallback
+}
+
 function ResolveModal({ flag, onClose, onResolved }) {
   const client = useClient()
   const [status, setStatus] = useState('resolved')
@@ -37,7 +47,7 @@ function ResolveModal({ flag, onClose, onResolved }) {
       <form onSubmit={handleSubmit} className="bg-base-100 border-2 border-base-300 p-6 w-full max-w-md flex flex-col gap-4"
         onClick={(e) => e.stopPropagation()}>
         <h2 className="font-display text-2xl tracking-wide">Resolve Flag</h2>
-        <p className="font-ui text-xs text-base-content/60">{flag.reason ?? 'No reason given'}</p>
+        <p className="font-ui text-xs text-base-content/60">{reasonLabel(flag.reason, 'No reason given')}</p>
         {error && <p className="font-ui text-xs text-error">{error}</p>}
 
         <div className="flex gap-0">
@@ -164,7 +174,7 @@ export default function AdminModerationPage() {
                   </td>
                   <td className="py-3 pr-4 font-ui text-xs text-base-content/50 max-w-28 truncate">{flag.actorId ?? '—'}</td>
                   <td className="py-3 pr-4 font-ui text-sm max-w-48">
-                    <span className="line-clamp-2">{flag.reason ?? '—'}</span>
+                    <span className="line-clamp-2">{reasonLabel(flag.reason)}</span>
                     {flag.notes && <span className="block font-ui text-xs text-base-content/40 mt-0.5 line-clamp-1">{flag.notes}</span>}
                   </td>
                   <td className="py-3 pr-4 font-ui text-xs text-base-content/50 whitespace-nowrap">{fmtDate(flag.createdAt)}</td>
