@@ -24,10 +24,11 @@ const NAV_GROUPS = [
   {
     label: 'Manage',
     items: [
-      { to: '/admin/users',   label: 'Users',   icon: Users },
-      { to: '/admin/posts',   label: 'Posts',   icon: FileText },
-      { to: '/admin/circles', label: 'Circles', icon: Circle },
-      { to: '/admin/groups',  label: 'Groups',  icon: Users2 },
+      { to: '/admin/moderation', label: 'Moderation', icon: Flag },
+      { to: '/admin/users',      label: 'Users',      icon: Users },
+      { to: '/admin/posts',      label: 'Posts',      icon: FileText },
+      { to: '/admin/circles',    label: 'Circles',    icon: Circle },
+      { to: '/admin/groups',     label: 'Groups',     icon: Users2 },
     ],
   },
   {
@@ -41,11 +42,10 @@ const NAV_GROUPS = [
   {
     label: 'System',
     items: [
-      { to: '/admin/invites',    label: 'Invites',    icon: Mail },
-      { to: '/admin/moderation', label: 'Moderation', icon: Flag },
-      { to: '/admin/themes',     label: 'Themes',     icon: Palette },
-      { to: '/admin/settings',   label: 'Settings',   icon: Settings },
-      { to: '/admin/logs',       label: 'Logs',       icon: ScrollText },
+      { to: '/admin/invites',  label: 'Invites',  icon: Mail },
+      { to: '/admin/themes',   label: 'Themes',   icon: Palette },
+      { to: '/admin/settings', label: 'Settings', icon: Settings },
+      { to: '/admin/logs',     label: 'Logs',     icon: ScrollText },
     ],
   },
 ]
