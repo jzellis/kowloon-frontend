@@ -39,8 +39,8 @@ function StatCard({ label, value, sub, to }) {
     </>
   )
   return to
-    ? <Link to={to} className="border-2 border-base-300 p-5 block hover:border-primary hover:bg-base-200 transition-colors">{inner}</Link>
-    : <div className="border-2 border-base-300 p-5">{inner}</div>
+    ? <Link to={to} className="bg-base-200 p-5 block hover:bg-base-300 transition-colors">{inner}</Link>
+    : <div className="bg-base-200 p-5">{inner}</div>
 }
 
 function SectionTitle({ children }) {
@@ -98,6 +98,8 @@ export default function AdminDashboardPage() {
   )
 
   const c = stats?.counts ?? {}
+  const a = stats?.activity ?? {}
+  const m = stats?.media ?? {}
   const srv = stats?.server ?? {}
   const db = stats?.database ?? {}
   const disk = stats?.disk ?? null
@@ -107,6 +109,15 @@ export default function AdminDashboardPage() {
       <h1 className="font-display text-5xl tracking-wide mb-8">Dashboard</h1>
 
       <QuickLinks />
+
+      <SectionTitle>Activity</SectionTitle>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <StatCard label="Posts Today"        value={a.postsToday} />
+        <StatCard label="New Users (Week)"   value={a.newUsersWeek} />
+        <StatCard label="New Users (Month)"  value={a.newUsersMonth} />
+        <StatCard label="New Users (Year)"   value={a.newUsersYear} />
+        <StatCard label="Invites Used"       value={a.invitesUsed} />
+      </div>
 
       <SectionTitle>Content</SectionTitle>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -120,6 +131,16 @@ export default function AdminDashboardPage() {
         <StatCard label="Open Flags"     value={c.openFlags}    sub="moderation queue" to="/admin/moderation" />
         <StatCard label="Active Invites" value={c.activeInvites} to="/admin/invites" />
         <StatCard label="Activities"     value={c.activities} />
+      </div>
+
+      <SectionTitle>Media</SectionTitle>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <StatCard label="Total Files" value={m.totalFiles} />
+        <StatCard label="Photos"      value={m.photos} />
+        <StatCard label="Videos"      value={m.videos} />
+        <StatCard label="Audio"       value={m.audio} />
+        <StatCard label="Documents"   value={m.documents} />
+        <StatCard label="Total Size"  value={fmt(m.totalSizeKb)} />
       </div>
 
       <SectionTitle>Server</SectionTitle>
