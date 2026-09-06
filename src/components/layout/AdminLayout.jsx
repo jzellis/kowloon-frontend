@@ -8,7 +8,7 @@ import { Navigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, Users2, Circle,
   Mail, Flag, Settings, ArrowLeft, Palette, BookOpen, Bookmark,
-  Menu, X, ScrollText,
+  Menu, X, ScrollText, Compass,
 } from 'lucide-react'
 
 const NAV = [
@@ -20,6 +20,7 @@ const NAV = [
   { to: '/admin/pages',      label: 'Pages',        icon: BookOpen },
   { to: '/admin/bookmarks',  label: 'Bookmarks',    icon: Bookmark },
   { to: '/admin/invites',    label: 'Invites',      icon: Mail },
+  { to: '/admin/discovery',  label: 'Discover',     icon: Compass },
   { to: '/admin/moderation', label: 'Moderation',   icon: Flag },
   { to: '/admin/themes',     label: 'Themes',       icon: Palette },
   { to: '/admin/settings',   label: 'Settings',     icon: Settings },
