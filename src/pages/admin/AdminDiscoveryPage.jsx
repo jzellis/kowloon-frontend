@@ -5,16 +5,20 @@
 // "create a new section" (that would let an admin create a shelf with no
 // contentType at all, which the read side can't resolve).
 //
-// Adding NEW items isn't done here -- it's the "Add to Discovery" action
-// already wired into Post/Circle pages and the admin Posts/Circles tables
-// (components/discover/AddToDiscoveryModal.jsx). This page is for managing
-// what's already curated: reorder, edit the commentary, hide, or remove.
+// Adding NEW Post/Circle items isn't done here -- it's the "Add to Discovery"
+// action already wired into Post/Circle pages and the admin Posts/Circles
+// tables (components/discover/AddToDiscoveryModal.jsx). Servers are the one
+// exception: there's no page anywhere with an "Add to Discovery" button for
+// a remote server, so this page has its own "Add Server" flow (Servers
+// shelf only). Otherwise this page is for managing what's already curated:
+// reorder, edit the commentary, hide, or remove.
 
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronUp, ChevronDown, Trash2, RotateCcw, Pencil, Check, X, AlertTriangle } from 'lucide-react'
+import { ChevronUp, ChevronDown, Trash2, RotateCcw, Pencil, Check, X, AlertTriangle, Plus } from 'lucide-react'
 import { useClient } from '../../hooks/useClient'
 import Spinner from '../../components/ui/Spinner'
+import Modal from '../../components/ui/Modal'
 
 const REF_TYPE_PATH = {
   Post: '/posts/',
@@ -44,7 +48,85 @@ function imageOf(item) {
 
 // ── Section header: name/summary/visibility, inline-editable ──────────────
 
-function SectionHeader({ section, onSave, onToggleActive, pending }) {
+// ── Add Server modal (Servers shelf only) ──────────────────────────────────
+// Accepts either "@kwln.city" or "https://kwln.city" -- strip the protocol
+// and any path, ensure exactly one leading "@", to match the canonical
+// "@domain.tld" ref format schema/Discovery.js's refTypeOf expects.
+function normalizeServerRef(input) {
+  let v = input.trim().replace(/^https?:\/\//i, '').replace(/^@/, '')
+  v = v.split(/[/?#]/)[0].toLowerCase()
+  return v ? `@${v}` : ''
+}
+
+function AddServerModal({ open, sectionId, onClose, onAdded }) {
+  const client = useClient()
+  const [domain, setDomain] = useState('')
+  const [note, setNote] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState(null)
+
+  const ref = normalizeServerRef(domain)
+  const canSubmit = /^@[^@]+\.[^@]+$/.test(ref) && !submitting
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!canSubmit) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await client.admin.addDiscoveryItem({ ref, section: sectionId, note: note.trim() || undefined })
+      setDomain('')
+      setNote('')
+      onAdded()
+      onClose()
+    } catch (err) {
+      setError(err?.message || 'Failed to add server')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} title="Add Server">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <label className="font-ui text-xs uppercase tracking-widest text-base-content/60">Server</label>
+          <input
+            value={domain}
+            onChange={(e) => setDomain(e.target.value)}
+            placeholder="@kwln.city or https://kwln.city"
+            autoFocus
+            className="border-2 border-base-300 focus:border-primary bg-base-100 px-3 py-2 font-mono text-sm outline-none"
+          />
+          {domain && !canSubmit && (
+            <p className="font-ui text-[11px] text-error">Enter a valid domain, e.g. @kwln.city</p>
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="font-ui text-xs uppercase tracking-widest text-base-content/60">Commentary (optional)</label>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={3}
+            placeholder="Why this server is worth featuring…"
+            className="border-2 border-base-300 focus:border-primary bg-base-100 p-2.5 font-ui text-sm outline-none resize-none"
+          />
+        </div>
+        {error && <p className="font-ui text-sm text-error">{error}</p>}
+        <div className="flex justify-end gap-2">
+          <button type="button" onClick={onClose} className="px-4 py-2 font-ui text-xs uppercase tracking-widest text-base-content/60 hover:text-base-content">
+            Cancel
+          </button>
+          <button type="submit" disabled={!canSubmit} className="px-4 py-2 bg-primary text-primary-content font-ui text-xs uppercase tracking-widest hover:bg-primary/85 disabled:opacity-40 transition-colors">
+            {submitting ? 'Adding…' : 'Add'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+function SectionHeader({ section, onSave, onToggleActive, onAddServer, pending }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(section.name)
   const [summary, setSummary] = useState(section.summary ?? '')
@@ -96,6 +178,15 @@ function SectionHeader({ section, onSave, onToggleActive, pending }) {
               <span className="font-ui text-[10px] uppercase tracking-widest text-base-content/40">
                 {section.to === '@public' ? 'Public' : 'Server-only'}
               </span>
+              {onAddServer && (
+                <button
+                  type="button"
+                  onClick={onAddServer}
+                  className="flex items-center gap-1 font-ui text-[10px] uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
+                >
+                  <Plus size={11} /> Add Server
+                </button>
+              )}
             </div>
             {section.summary && <p className="font-reading text-sm text-base-content/50 italic mt-1">{section.summary}</p>}
           </>
@@ -235,6 +326,7 @@ export default function AdminDiscoveryPage() {
   const [denied, setDenied] = useState(false)
   const [showRemoved, setShowRemoved] = useState(false)
   const [pending, setPending] = useState(null)
+  const [addServerSectionId, setAddServerSectionId] = useState(null)
 
   const load = useCallback(async () => {
     if (!client) return
@@ -355,6 +447,7 @@ export default function AdminDiscoveryPage() {
                   section={section}
                   onSave={saveSectionEdit}
                   onToggleActive={toggleSectionActive}
+                  onAddServer={section.contentType === 'servers' ? () => setAddServerSectionId(section.id) : null}
                   pending={pending === section.id}
                 />
                 {sectionItems.length === 0 ? (
@@ -392,6 +485,13 @@ export default function AdminDiscoveryPage() {
           )}
         </div>
       )}
+
+      <AddServerModal
+        open={!!addServerSectionId}
+        sectionId={addServerSectionId}
+        onClose={() => setAddServerSectionId(null)}
+        onAdded={load}
+      />
     </div>
   )
 }
