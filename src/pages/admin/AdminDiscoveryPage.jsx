@@ -301,17 +301,24 @@ export default function AdminDiscoveryPage() {
         .filter((i) => i.section === item.section && !i.deletedAt)
         .sort((a, b) => a.order - b.order)
       const idx = siblings.findIndex((i) => i.id === item.id)
-      const swapWith = siblings[idx + dir]
-      if (!swapWith) return
-      const [a, b] = [
-        client.admin.updateDiscoveryItem({ discoveryId: item.id, updates: { order: swapWith.order } }),
-        client.admin.updateDiscoveryItem({ discoveryId: swapWith.id, updates: { order: item.order } }),
-      ]
-      const [resA, resB] = await Promise.all([a, b])
+      const swapIdx = idx + dir
+      if (swapIdx < 0 || swapIdx >= siblings.length) return
+      // Swap ARRAY POSITIONS, then reassign sequential order values (0, 1, 2…)
+      // to every sibling -- not just swap the two items' existing `order`
+      // numbers. Items added via "Add to Discovery" never set `order` at
+      // all (always the schema default, 0), so in practice most siblings
+      // share the same value; swapping two equal numbers is a no-op.
+      const reordered = [...siblings]
+      ;[reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]]
+      const changed = reordered
+        .map((i, order) => ({ i, order }))
+        .filter(({ i, order }) => i.order !== order)
+      const results = await Promise.all(
+        changed.map(({ i, order }) => client.admin.updateDiscoveryItem({ discoveryId: i.id, updates: { order } }))
+      )
       setItems((prev) => prev.map((i) => {
-        if (i.id === item.id) return { ...resA.discovery, target: i.target }
-        if (i.id === swapWith.id) return { ...resB.discovery, target: i.target }
-        return i
+        const res = results.find((r, idx2) => changed[idx2].i.id === i.id)
+        return res ? { ...res.discovery, target: i.target } : i
       }))
     })
 
